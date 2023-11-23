@@ -1,0 +1,3 @@
+NOT_USE_CONSOLE: '&cコンソールからこのコマンドを使用することはできません！'
+WRONG_COMMAND: '&cコマンドの使い方が間違っています。'
+COMMAND_LIST: '&fコマンドの使い方: /mobescape <join|leave|start|stop|setspawn|setarena|setlobby>'
