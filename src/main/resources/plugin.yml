@@ -1,0 +1,3 @@
+name: MobEscape
+version: '${project.version}'
+main: xyz.mlserver.mobescape.MobEscape
