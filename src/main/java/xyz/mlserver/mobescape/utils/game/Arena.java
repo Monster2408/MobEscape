@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class Arena {
 
@@ -127,11 +128,31 @@ public class Arena {
         }
     }
 
+    public static void loadArena(){
+        checkFile();
+        if (file == null) return;
+        getArenaMap().clear();
+        for (File file1 : Objects.requireNonNull(file.listFiles())) {
+            if (file1.getName().endsWith(".yml")) {
+                String fileName = file1.getName().replace(".yml", "");
+                int id = Integer.parseInt(fileName);
+                YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file1);
+                Arena arena = parseArena(yaml);
+                getArenaMap().put(id, arena);
+            }
+        }
+    }
+
     public static YamlConfiguration parseYaml(Arena arena){
         Gson gson = new Gson();
         YamlConfiguration yaml = new YamlConfiguration();
         yaml.set("data", gson.toJson(arena));
         return yaml;
+    }
+
+    public static Arena parseArena(YamlConfiguration yaml){
+        Gson gson = new Gson();
+        return gson.fromJson(yaml.getString("data"), Arena.class);
     }
 
     public static int getNewId() {

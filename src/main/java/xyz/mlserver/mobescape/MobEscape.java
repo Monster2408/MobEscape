@@ -2,6 +2,7 @@ package xyz.mlserver.mobescape;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.mlserver.mc.util.CustomConfiguration;
+import xyz.mlserver.mobescape.utils.game.Arena;
 
 public final class MobEscape extends JavaPlugin {
 
@@ -19,6 +20,8 @@ public final class MobEscape extends JavaPlugin {
         messageYml.saveDefaultConfig();
 
         plugin = this;
+
+        Arena.loadArena();
     }
 
     @Override
