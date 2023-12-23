@@ -2,7 +2,7 @@ package xyz.mlserver.mobescape;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.mlserver.mc.util.CustomConfiguration;
-import xyz.mlserver.mobescape.utils.game.Arena;
+import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
 public final class MobEscape extends JavaPlugin {
 
@@ -21,7 +21,7 @@ public final class MobEscape extends JavaPlugin {
 
         plugin = this;
 
-        Arena.loadArena();
+        MobEscapeMap.loadArena();
     }
 
     @Override
