@@ -31,7 +31,7 @@ public class MobEscapeMap {
         this.minPlayer = -1;
         this.spawns = new ArrayList<>();
         this.arenaLobby = null;
-        this.material = Material.GRASS.name();
+        this.material = null;
     }
 
     public String getName() {
@@ -96,6 +96,7 @@ public class MobEscapeMap {
     }
 
     public Material getMaterial() {
+        if (material == null) setMaterial(Material.GRASS);
         return Material.getMaterial(material);
     }
 
