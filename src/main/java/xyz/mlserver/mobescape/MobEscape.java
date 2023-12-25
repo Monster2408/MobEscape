@@ -2,6 +2,9 @@ package xyz.mlserver.mobescape;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.mlserver.mc.util.CustomConfiguration;
+import xyz.mlserver.mobescape.listeners.BukkitPlayerJoinListener;
+import xyz.mlserver.mobescape.listeners.BukkitPlayerQuitListener;
+import xyz.mlserver.mobescape.listeners.MEGUIClickListener;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
 public final class MobEscape extends JavaPlugin {
@@ -18,6 +21,10 @@ public final class MobEscape extends JavaPlugin {
         config.saveDefaultConfig();
         messageYml = new CustomConfiguration(this, "message.yml");
         messageYml.saveDefaultConfig();
+
+        getServer().getPluginManager().registerEvents(new BukkitPlayerJoinListener(), this);
+        getServer().getPluginManager().registerEvents(new BukkitPlayerQuitListener(), this);
+        getServer().getPluginManager().registerEvents(new MEGUIClickListener(), this);
 
         plugin = this;
 

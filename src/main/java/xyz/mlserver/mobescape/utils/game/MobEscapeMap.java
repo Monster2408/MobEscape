@@ -23,6 +23,7 @@ public class MobEscapeMap {
     private List<String> spawns;
     private String arenaLobby;
     private String material;
+    private List<String> members;
 
     public MobEscapeMap(String name, int id) {
         this.name = name;
@@ -32,6 +33,7 @@ public class MobEscapeMap {
         this.spawns = new ArrayList<>();
         this.arenaLobby = null;
         this.material = null;
+        this.members = new ArrayList<>();
     }
 
     public String getName() {
@@ -100,6 +102,26 @@ public class MobEscapeMap {
         return Material.getMaterial(material);
     }
 
+    public void addMember(Player player) {
+        String uuid = player.getUniqueId().toString();
+        if (!getMembers().contains(uuid)) getMembers().add(uuid);
+    }
+
+    public void removeMember(Player player) {
+        getMembers().remove(player.getUniqueId().toString());
+    }
+
+    public List<String> getMembers() {
+        if (members == null) members = new ArrayList<>();
+        return members;
+    }
+
+    public void join(Player player) {
+        if (getArenaLobby() == null) return;
+        addMember(player);
+        player.teleport(getArenaLobby());
+    }
+
     // ---------------------------- //
 
     private static Location lobby = null;
@@ -145,6 +167,7 @@ public class MobEscapeMap {
         checkFile();
         for (MobEscapeMap map : getMapHashMap().values()) {
             File file = new File(MobEscape.getPlugin().getDataFolder() + "/arena/" + map.getId() + ".yml");
+            map.getMembers().clear();
             YamlConfiguration yaml = parseYaml(map);
             try {
                 yaml.save(file);
@@ -154,7 +177,7 @@ public class MobEscapeMap {
         }
     }
 
-    public static void loadArena(){
+    public static void loadArena() {
         checkFile();
         if (file == null) return;
         getMapHashMap().clear();
@@ -163,8 +186,8 @@ public class MobEscapeMap {
                 String fileName = file1.getName().replace(".yml", "");
                 int id = Integer.parseInt(fileName);
                 YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file1);
-                MobEscapeMap arena = parseMap(yaml);
-                getMapHashMap().put(id, arena);
+                MobEscapeMap map = parseMap(yaml);
+                getMapHashMap().put(id, map);
             }
         }
     }
