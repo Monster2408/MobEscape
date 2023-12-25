@@ -28,7 +28,7 @@ public final class MobEscape extends JavaPlugin {
 
         plugin = this;
 
-        MobEscapeMap.loadArena();
+        MobEscapeMap.loadMap();
     }
 
     @Override

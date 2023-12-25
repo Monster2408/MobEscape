@@ -177,7 +177,7 @@ public class MobEscapeMap {
         }
     }
 
-    public static void loadArena() {
+    public static void loadMap() {
         checkFile();
         if (file == null) return;
         getMapHashMap().clear();
