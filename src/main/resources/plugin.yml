@@ -1,3 +1,9 @@
 name: MobEscape
 version: '${project.version}'
 main: xyz.mlserver.mobescape.MobEscape
+
+commands:
+    mobescape:
+        description: MobEscape command
+        aliases: [me]
+        permission: mobescape.command

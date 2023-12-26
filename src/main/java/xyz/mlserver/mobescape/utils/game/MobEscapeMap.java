@@ -53,7 +53,7 @@ public class MobEscapeMap {
     }
 
     public List<Location> getSpawns() {
-        if (spawns == null) return null;
+        if (spawns == null) spawns = new ArrayList<>();
         if (spawns.isEmpty()) return null;
         List<Location> list = new ArrayList<>();
         Location loc;
@@ -78,11 +78,12 @@ public class MobEscapeMap {
     }
 
     public void addSpawn(Location spawn) {
-        getSpawns().add(spawn.clone());
+        if (spawns == null) spawns = new ArrayList<>();
+        spawns.add(LocationParser.parseJson(spawn.clone()));
     }
 
     public void deleteSpawn() {
-        getSpawns().clear();
+        spawns = new ArrayList<>();
     }
 
     public void setArenaLobby(Location arenaLobby) {
@@ -134,7 +135,7 @@ public class MobEscapeMap {
         MobEscapeMap.lobby = lobby;
     }
 
-    private static final File file = new File(MobEscape.getPlugin().getDataFolder() + "/arena");
+    private static final File file = new File(MobEscape.getPlugin().getDataFolder() + "/map");
 
     public static boolean checkFile() {
         if (!file.exists()) return file.mkdirs();
@@ -162,11 +163,11 @@ public class MobEscapeMap {
         getEditingArena().put(player, map);
     }
 
-    public static void saveMap(){
+    public static void saveMap() {
         if (getMapHashMap().isEmpty()) return;
         checkFile();
         for (MobEscapeMap map : getMapHashMap().values()) {
-            File file = new File(MobEscape.getPlugin().getDataFolder() + "/arena/" + map.getId() + ".yml");
+            File file = new File(MobEscape.getPlugin().getDataFolder() + "/map/" + map.getId() + ".yml");
             map.getMembers().clear();
             YamlConfiguration yaml = parseYaml(map);
             try {

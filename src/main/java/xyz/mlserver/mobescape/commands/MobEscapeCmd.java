@@ -175,6 +175,17 @@ public class MobEscapeCmd implements CommandExecutor {
                 sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方が間違っています。");
                 sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方: /mobescape list <map|spawn>");
             }
+            return true;
+        } else if (args[0].equalsIgnoreCase("save")) {
+            if (args.length > 1) {
+                if (args[1].equalsIgnoreCase("confirm")) {
+                    MobEscapeMap.saveMap();
+                    sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップを保存しました。");
+                }
+            } else {
+                sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップを保存するには、/mobescape save confirm を実行してください。");
+            }
+            return true;
         }
         return false;
     }

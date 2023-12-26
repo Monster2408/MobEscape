@@ -70,6 +70,7 @@ public class MobEscapeGUI {
                 map = maps.get(num);
                 gui.setItem(i, getMapItem(map));
             }
+            num++;
         }
         if (page > 1) gui.setItem(48, getPreviousPage());
         gui.setItem(49, getPageItem(page));
