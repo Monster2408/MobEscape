@@ -193,10 +193,10 @@ public class MobEscapeMap {
         }
     }
 
-    public static YamlConfiguration parseYaml(MobEscapeMap arena){
+    public static YamlConfiguration parseYaml(MobEscapeMap map){
         Gson gson = new Gson();
         YamlConfiguration yaml = new YamlConfiguration();
-        yaml.set("data", gson.toJson(arena));
+        yaml.set("data", gson.toJson(map));
         return yaml;
     }
 
