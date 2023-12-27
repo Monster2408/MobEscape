@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class MobEscapeMap {
 
@@ -24,6 +25,12 @@ public class MobEscapeMap {
     private String arenaLobby;
     private String material;
     private List<String> members;
+    private HashMap<Integer, String> path;
+
+    private String pos1;
+    private String pos2;
+    private String goalPos1;
+    private String goalPos2;
 
     public MobEscapeMap(String name, int id) {
         this.name = name;
@@ -34,6 +41,78 @@ public class MobEscapeMap {
         this.arenaLobby = null;
         this.material = null;
         this.members = new ArrayList<>();
+        this.pos1 = null;
+        this.pos2 = null;
+        this.path = new HashMap<>();
+        this.goalPos1 = null;
+        this.goalPos2 = null;
+    }
+
+    public Location getGoalPos1() {
+        return LocationParser.parseLocation(goalPos1);
+    }
+
+    public void setGoalPos1(Location goalPos1) {
+        this.goalPos1 = LocationParser.parseJson(goalPos1);
+    }
+
+    public Location getGoalPos2() {
+        return LocationParser.parseLocation(goalPos2);
+    }
+
+    public void setGoalPos2(Location goalPos2) {
+        this.goalPos2 = LocationParser.parseJson(goalPos2);
+    }
+
+
+    public HashMap<Integer, String> getPath() {
+        if (path == null) path = new HashMap<>();
+        return path;
+    }
+
+    public void setPath(HashMap<Integer, String> path) {
+        this.path = path;
+    }
+
+    public void addPath(Location loc) {
+        int num = -1;
+        if (getPath().isEmpty()) num = 0;
+        else {
+            for (int i : getPath().keySet()) {
+                if (i > num) num = i;
+            }
+        }
+        getPath().put((num + 1), LocationParser.parseJson(loc));
+    }
+
+    public void removePath() {
+        int num = -1;
+        if (!getPath().isEmpty()) {
+            for (int i : getPath().keySet()) {
+                if (i > num) num = i;
+            }
+            getPath().remove(num);
+        }
+    }
+
+    public void deletePath() {
+        getPath().clear();
+    }
+
+    public Location getPos1() {
+        return LocationParser.parseLocation(pos1);
+    }
+
+    public Location getPos2() {
+        return LocationParser.parseLocation(pos2);
+    }
+
+    public void setPos1(Location pos1) {
+        this.pos1 = LocationParser.parseJson(pos1);
+    }
+
+    public void setPos2(Location pos2) {
+        this.pos2 = LocationParser.parseJson(pos2);
     }
 
     public String getName() {
@@ -167,14 +246,19 @@ public class MobEscapeMap {
         if (getMapHashMap().isEmpty()) return;
         checkFile();
         for (MobEscapeMap map : getMapHashMap().values()) {
-            File file = new File(MobEscape.getPlugin().getDataFolder() + "/map/" + map.getId() + ".yml");
-            map.getMembers().clear();
-            YamlConfiguration yaml = parseYaml(map);
-            try {
-                yaml.save(file);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            saveMap(map);
+        }
+    }
+
+    public static void saveMap(MobEscapeMap map) {
+        checkFile();
+        File file = new File(MobEscape.getPlugin().getDataFolder() + "/map/" + map.getId() + ".yml");
+        map.getMembers().clear();
+        YamlConfiguration yaml = parseYaml(map);
+        try {
+            yaml.save(file);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -189,6 +273,20 @@ public class MobEscapeMap {
                 YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file1);
                 MobEscapeMap map = parseMap(yaml);
                 getMapHashMap().put(id, map);
+            }
+        }
+    }
+
+    public static void loadMap(MobEscapeMap map) {
+        checkFile();
+        if (file == null) return;
+        for (File file1 : Objects.requireNonNull(file.listFiles())) {
+            if (file1.getName().equalsIgnoreCase(map.getId() + ".yml")) {
+                String fileName = file1.getName().replace(".yml", "");
+                int id = Integer.parseInt(fileName);
+                YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file1);
+                getMapHashMap().put(id, parseMap(yaml));
+                return;
             }
         }
     }

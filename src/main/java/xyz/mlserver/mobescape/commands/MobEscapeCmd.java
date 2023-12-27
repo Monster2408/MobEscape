@@ -1,5 +1,13 @@
 package xyz.mlserver.mobescape.commands;
 
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldedit.internal.annotation.Selection;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.World;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -109,10 +117,95 @@ public class MobEscapeCmd implements CommandExecutor {
                             sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lアイコンを「" + item.getType().name() + "」に設定しました。");
                         }
                     }
+                } else if (args[1].equalsIgnoreCase("pos")) {
+                    if (map == null) {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");
+                    } else {
+                        WorldEditPlugin worldEdit = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
+                        if (worldEdit == null) {
+                            sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lWorldEditがインストールされていません。");
+                        } else {
+                            LocalSession session = worldEdit.getSession(player);
+                            try {
+                                Region selection = session.getSelection(session.getSelectionWorld());
+                                if (selection != null && selection.getWorld() != null && selection.getMinimumPoint() != null && selection.getMaximumPoint() != null) {
+                                    Location pos1 = new Location(
+                                            Bukkit.getWorld(selection.getWorld().getName()),
+                                            selection.getMinimumPoint().getX(),
+                                            selection.getMinimumPoint().getY(),
+                                            selection.getMinimumPoint().getZ()
+                                    );
+                                    Location pos2 = new Location(
+                                            Bukkit.getWorld(selection.getWorld().getName()),
+                                            selection.getMaximumPoint().getX(),
+                                            selection.getMaximumPoint().getY(),
+                                            selection.getMaximumPoint().getZ()
+                                    );
+                                    map.setPos1(pos1);
+                                    map.setPos2(pos2);
+                                    sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l範囲を設定しました。");
+                                } else {
+                                    sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l範囲を選択してください。");
+                                }
+                            } catch (IncompleteRegionException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                } else if (args[1].equalsIgnoreCase("pos1")) {
+                    if (map == null) {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");
+                    } else {
+                        map.setPos1(playerLoc.clone());
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l範囲1を設定しました。");
+                    }
+                } else if (args[1].equalsIgnoreCase("pos2")) {
+                    if (map == null) {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");
+                    } else {
+                        map.setPos2(playerLoc.clone());
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l範囲2を設定しました。");
+                    }
+                } else if (args[1].equalsIgnoreCase("goal")) {
+                    if (map == null) {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");
+                    } else {
+                        WorldEditPlugin worldEdit = (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
+                        if (worldEdit == null) {
+                            sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lWorldEditがインストールされていません。");
+                        } else {
+                            LocalSession session = worldEdit.getSession(player);
+                            try {
+                                Region selection = session.getSelection(session.getSelectionWorld());
+                                if (selection != null && selection.getWorld() != null && selection.getMinimumPoint() != null && selection.getMaximumPoint() != null) {
+                                    Location pos1 = new Location(
+                                            Bukkit.getWorld(selection.getWorld().getName()),
+                                            selection.getMinimumPoint().getX(),
+                                            selection.getMinimumPoint().getY(),
+                                            selection.getMinimumPoint().getZ()
+                                    );
+                                    Location pos2 = new Location(
+                                            Bukkit.getWorld(selection.getWorld().getName()),
+                                            selection.getMaximumPoint().getX(),
+                                            selection.getMaximumPoint().getY(),
+                                            selection.getMaximumPoint().getZ()
+                                    );
+                                    map.setGoalPos1(pos1);
+                                    map.setGoalPos2(pos2);
+                                    sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lゴール範囲を設定しました。");
+                                } else {
+                                    sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l範囲を選択してください。");
+                                }
+                            } catch (IncompleteRegionException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
                 } else {
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方が間違っています。");
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方: /mobescape set <lobby|name|max|min>");
                 }
+                return true;
             } else {
                 sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方が間違っています。");
                 sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方: /mobescape set <lobby|name|max|min>");
@@ -125,6 +218,9 @@ public class MobEscapeCmd implements CommandExecutor {
                 if (args[1].equalsIgnoreCase("spawn")) {
                     map.addSpawn(playerLoc.clone());
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lスポーン地点を追加しました。");
+                } else if (args[1].equalsIgnoreCase("path")) {
+                    sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l中継地点を追加しました。" + ChatColor.LIGHT_PURPLE + "#" + map.getPath().size());
+                    map.addPath(playerLoc.clone());
                 } else {
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方が間違っています。");
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方: /mobescape add spawn");
@@ -141,6 +237,9 @@ public class MobEscapeCmd implements CommandExecutor {
                 if (args[1].equalsIgnoreCase("spawn")) {
                     map.deleteSpawn();
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lスポーン地点を削除しました。");
+                } else if (args[1].equalsIgnoreCase("path")) {
+                    map.deletePath();
+                    sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l中継地点を削除しました。");
                 } else {
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方が間違っています。");
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方: /mobescape delete spawn");
@@ -186,6 +285,8 @@ public class MobEscapeCmd implements CommandExecutor {
                 sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップを保存するには、/mobescape save confirm を実行してください。");
             }
             return true;
+        } else if (args[0].equalsIgnoreCase("edit")) {
+            MobEscapeGUI.openEdit(map, player);
         }
         return false;
     }

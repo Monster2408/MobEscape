@@ -1,6 +1,8 @@
 name: MobEscape
 version: '${project.version}'
 main: xyz.mlserver.mobescape.MobEscape
+depend:
+    - WorldEdit
 
 commands:
     mobescape:
