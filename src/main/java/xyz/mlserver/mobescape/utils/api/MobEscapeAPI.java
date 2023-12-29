@@ -133,7 +133,40 @@ public class MobEscapeAPI {
     }
 
 
+    private static HashMap<MobEscapeMap, BukkitTask> countdownTaskMap;
 
+    private static HashMap<MobEscapeMap, BukkitTask> getCountdownTaskMap() {
+        if (countdownTaskMap == null) countdownTaskMap = new HashMap<>();
+        return countdownTaskMap;
+    }
+
+    public static void setCountdownTaskMap(MobEscapeMap map, BukkitTask task) {
+        getCountdownTaskMap().put(map, task);
+    }
+
+    /**
+     * Arenaにプレイヤーが参加したときに呼び出されます。
+     */
+    public static void startArenaCountDown(MobEscapeMap map) {
+        if (map.getMinPlayer() > map.getMembers().size()) return;
+        map.setArenaCountDownTimer(map.getArenaCountDownTime());
+        BukkitTask task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (map.getArenaCountDownTimer() <= 0) {
+                    cancel();
+                    return;
+                }
+                for (Player all : Bukkit.getOnlinePlayers()) {
+                    if (map.getMembers().contains(all.getUniqueId().toString())) {
+                        all.setLevel(map.getArenaCountDownTimer());
+                    }
+                }
+                map.setArenaCountDownTimer(map.getArenaCountDownTimer() - 1);
+            }
+        }.runTaskTimer(MobEscape.getPlugin(), 0, 2);
+        setCountdownTaskMap(map, task);
+    }
 
 
 }
