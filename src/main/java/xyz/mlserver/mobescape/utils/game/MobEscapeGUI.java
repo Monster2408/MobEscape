@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +69,7 @@ public class MobEscapeGUI {
         String title = getTitle();
         Inventory gui = Bukkit.createInventory(null, 9*6, title);
         int num = (page - 1) * 45;
-        List<MobEscapeMap> maps = new ArrayList<>(MobEscapeMap.getMapHashMap().values());
+        List<MobEscapeMap> maps = new ArrayList<>(MobEscapeAPI.getMapHashMap().values());
         MobEscapeMap map;
         for (int i = 0; i < 45; i++) {
             if (maps.size() > num) {
@@ -98,7 +99,7 @@ public class MobEscapeGUI {
         Inventory gui = Bukkit.createInventory(null, guiSize, title);
         if (map == null) {
             int num = (page - 1) * 45;
-            List<MobEscapeMap> maps = new ArrayList<>(MobEscapeMap.getMapHashMap().values());
+            List<MobEscapeMap> maps = new ArrayList<>(MobEscapeAPI.getMapHashMap().values());
             for (int i = 0; i < (guiSize - 9); i++) {
                 if (maps.size() > num) {
                     map = maps.get(num);
@@ -129,7 +130,7 @@ public class MobEscapeGUI {
 
     public static boolean isPosItem(ItemStack item) {
         if (item == null) return false;
-        for (MobEscapeMap map : MobEscapeMap.getMapHashMap().values()) {
+        for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
             if (item.isSimilar(getPosItem(map))) return true;
         }
         return false;
@@ -165,7 +166,7 @@ public class MobEscapeGUI {
 
     public static boolean isArenaItem(ItemStack item) {
         if (item == null) return false;
-        for (MobEscapeMap map : MobEscapeMap.getMapHashMap().values()) {
+        for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
             if (item.isSimilar(getArenaItem(map))) return true;
         }
         return false;
@@ -232,7 +233,7 @@ public class MobEscapeGUI {
     public static MobEscapeMap getMap(ItemStack item) {
         if (item == null) return null;
         if (item.getItemMeta() == null) return null;
-        for (MobEscapeMap map : MobEscapeMap.getMapHashMap().values()) {
+        for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
             if (item.isSimilar(getMapItem(map))) return map;
         }
         return null;
@@ -270,7 +271,7 @@ public class MobEscapeGUI {
     public static MobEscapeMap getEditMap(ItemStack item) {
         if (item == null) return null;
         if (item.getItemMeta() == null) return null;
-        for (MobEscapeMap map : MobEscapeMap.getMapHashMap().values()) {
+        for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
             if (item.isSimilar(getEditMapItem(map))) return map;
         }
         return null;
@@ -278,7 +279,7 @@ public class MobEscapeGUI {
 
     public static boolean isNameItem(ItemStack item) {
         if (item == null) return false;
-        for (MobEscapeMap map : MobEscapeMap.getMapHashMap().values()) {
+        for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
             if (item.isSimilar(getNameItem(map))) return true;
         }
         return false;
@@ -298,7 +299,7 @@ public class MobEscapeGUI {
 
     public static boolean isIconItem(ItemStack item) {
         if (item == null) return false;
-        for (MobEscapeMap map : MobEscapeMap.getMapHashMap().values()) {
+        for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
             if (item.isSimilar(getIconItem(map))) return true;
         }
         return false;
@@ -318,7 +319,7 @@ public class MobEscapeGUI {
 
     public static boolean isGoalItem(ItemStack item) {
         if (item == null) return false;
-        for (MobEscapeMap map : MobEscapeMap.getMapHashMap().values()) {
+        for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
             if (item.isSimilar(getGoalItem(map))) return true;
         }
         return false;

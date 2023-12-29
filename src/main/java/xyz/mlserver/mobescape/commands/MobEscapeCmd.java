@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.mlserver.java.Log;
 import xyz.mlserver.mobescape.MobEscape;
+import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 import xyz.mlserver.mobescape.utils.api.MsgAPI;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
 import xyz.mlserver.mobescape.utils.game.MobEscapeGUI;
@@ -45,11 +46,11 @@ public class MobEscapeCmd implements CommandExecutor {
         if (!sender.isOp()) return true;
 
         Location playerLoc = player.getLocation().clone();
-        MobEscapeMap map = MobEscapeMap.getEditMap(player);
+        MobEscapeMap map = MobEscapeAPI.getEditMap(player);
         if (args[0].equalsIgnoreCase("create")) {
             if (args.length > 1) {
                 String mapName = args[1];
-                MobEscapeMap.createMap(player, mapName);
+                MobEscapeAPI.createMap(player, mapName);
                 sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップ「" + mapName + "」を作成しました。");
                 return true;
             } else {
@@ -58,7 +59,7 @@ public class MobEscapeCmd implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("set")) {
             if (args.length > 1) {
                 if (args[1].equalsIgnoreCase("lobby")) {
-                    MobEscapeMap.setLobby(playerLoc.clone());
+                    MobEscapeAPI.setLobby(playerLoc.clone());
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lロビーを設定しました。");
                 } else if (args[1].equalsIgnoreCase("name")) {
                     if (map == null) {
@@ -253,8 +254,8 @@ public class MobEscapeCmd implements CommandExecutor {
             if (args.length > 1) {
                 if (args[1].equalsIgnoreCase("map")) {
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップ一覧");
-                    for (int id : MobEscapeMap.getMapHashMap().keySet()) {
-                        MobEscapeMap map1 = MobEscapeMap.getMapHashMap().get(id);
+                    for (int id : MobEscapeAPI.getMapHashMap().keySet()) {
+                        MobEscapeMap map1 = MobEscapeAPI.getMapHashMap().get(id);
                         if (map1 == null) {
                             continue;
                         }
@@ -278,7 +279,7 @@ public class MobEscapeCmd implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("save")) {
             if (args.length > 1) {
                 if (args[1].equalsIgnoreCase("confirm")) {
-                    MobEscapeMap.saveMap();
+                    MobEscapeAPI.saveMap();
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップを保存しました。");
                 }
             } else {

@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 import xyz.mlserver.mobescape.utils.game.MobEscapeGUI;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
@@ -55,7 +56,7 @@ public class MEGUIClickListener implements Listener {
 
         Player player = (Player) e.getWhoClicked();
 
-        for (MobEscapeMap map : MobEscapeMap.getMapHashMap().values()) {
+        for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
             if (e.getClickedInventory().getName().equalsIgnoreCase(MobEscapeGUI.getEditTitle() + " " + map.getName())) {
                 if (MobEscapeGUI.isArenaItem(e.getCurrentItem())) {
                     TextComponent message = new TextComponent(ChatColor.GOLD + "クリックでアリーナを設定する。");
@@ -95,19 +96,19 @@ public class MEGUIClickListener implements Listener {
                     return;
                 } else if (e.getCurrentItem().isSimilar(MobEscapeGUI.getLoadItem())) {
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    MobEscapeMap.loadMap(map);
+                    MobEscapeAPI.loadMap(map);
                     MobEscapeGUI.openEdit(map, player);
                     player.sendMessage(ChatColor.GREEN + "マップをロードしました。");
                     return;
                 } else if (e.getCurrentItem().isSimilar(MobEscapeGUI.getSaveItem())) {
                     player.closeInventory();
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    MobEscapeMap.saveMap(map);
+                    MobEscapeAPI.saveMap(map);
                     player.sendMessage(ChatColor.GREEN + "マップを保存しました。");
                     return;
                 } else if (e.getCurrentItem().isSimilar(MobEscapeGUI.getClose())) {
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    MobEscapeMap.setEditingMap(player, null);
+                    MobEscapeAPI.setEditingMap(player, null);
                     MobEscapeGUI.openEdit(null, player);
                     return;
                 }
@@ -115,7 +116,7 @@ public class MEGUIClickListener implements Listener {
                 if (e.getCurrentItem().isSimilar(MobEscapeGUI.getEditMapItem(map))) {
                     player.closeInventory();
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    MobEscapeMap.setEditingMap(player, map);
+                    MobEscapeAPI.setEditingMap(player, map);
                     MobEscapeGUI.openEdit(map, player);
                     return;
                 } else if (e.getCurrentItem().isSimilar(MobEscapeGUI.getClose())) {

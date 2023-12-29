@@ -6,6 +6,7 @@ import xyz.mlserver.mobescape.commands.MobEscapeCmd;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerJoinListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerQuitListener;
 import xyz.mlserver.mobescape.listeners.MEGUIClickListener;
+import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
 public final class MobEscape extends JavaPlugin {
@@ -31,7 +32,7 @@ public final class MobEscape extends JavaPlugin {
 
         plugin = this;
 
-        MobEscapeMap.loadMap();
+        MobEscapeAPI.loadMap();
     }
 
     @Override

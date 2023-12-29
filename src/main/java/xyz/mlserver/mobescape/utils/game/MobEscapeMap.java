@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 import xyz.mlserver.mobescape.MobEscape;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
 
@@ -31,6 +32,10 @@ public class MobEscapeMap {
     private String pos2;
     private String goalPos1;
     private String goalPos2;
+    private Integer countDownTimer;
+    private Integer countDownTime;
+    private Integer arenaCountDownTimer;
+    private Integer arenaCountDownTime;
 
     public MobEscapeMap(String name, int id) {
         this.name = name;
@@ -46,6 +51,40 @@ public class MobEscapeMap {
         this.path = new HashMap<>();
         this.goalPos1 = null;
         this.goalPos2 = null;
+        this.arenaCountDownTime = 30;
+        this.arenaCountDownTimer = -1;
+    }
+
+    public Integer getArenaCountDownTime() {
+        return arenaCountDownTime;
+    }
+
+    public void setArenaCountDownTime(Integer arenaCountDownTime) {
+        this.arenaCountDownTime = arenaCountDownTime;
+    }
+
+    public Integer getArenaCountDownTimer() {
+        return arenaCountDownTimer;
+    }
+
+    public void setArenaCountDownTimer(Integer arenaCountDownTimer) {
+        this.arenaCountDownTimer = arenaCountDownTimer;
+    }
+
+    public Integer getCountDownTime() {
+        return countDownTime;
+    }
+
+    public void setCountDownTime(Integer countDownTime) {
+        this.countDownTime = countDownTime;
+    }
+
+    public Integer getCountDownTimer() {
+        return countDownTimer;
+    }
+
+    public void setCountDownTimer(Integer countDownTimer) {
+        this.countDownTimer = countDownTimer;
     }
 
     public Location getGoalPos1() {
@@ -200,126 +239,6 @@ public class MobEscapeMap {
         if (getArenaLobby() == null) return;
         addMember(player);
         player.teleport(getArenaLobby());
-    }
-
-    // ---------------------------- //
-
-    private static Location lobby = null;
-
-    public static Location getLobby() {
-        return lobby;
-    }
-
-    public static void setLobby(Location lobby) {
-        MobEscapeMap.lobby = lobby;
-    }
-
-    private static final File file = new File(MobEscape.getPlugin().getDataFolder() + "/map");
-
-    public static boolean checkFile() {
-        if (!file.exists()) return file.mkdirs();
-        return true;
-    }
-
-    private static HashMap<Integer, MobEscapeMap> mapHashMap;
-
-    public static HashMap<Integer, MobEscapeMap> getMapHashMap(){
-        if (mapHashMap == null) mapHashMap = new HashMap<>();
-        return mapHashMap;
-    }
-
-    private static HashMap<Player, MobEscapeMap> editingArena;
-
-    public static HashMap<Player, MobEscapeMap> getEditingArena(){
-        if (editingArena == null) editingArena = new HashMap<>();
-        return editingArena;
-    }
-
-    public static void createMap(Player player, String name){
-        int id = getNewId();
-        MobEscapeMap map = new MobEscapeMap(name, id);
-        getMapHashMap().put(id, map);
-        getEditingArena().put(player, map);
-    }
-
-    public static void saveMap() {
-        if (getMapHashMap().isEmpty()) return;
-        checkFile();
-        for (MobEscapeMap map : getMapHashMap().values()) {
-            saveMap(map);
-        }
-    }
-
-    public static void saveMap(MobEscapeMap map) {
-        checkFile();
-        File file = new File(MobEscape.getPlugin().getDataFolder() + "/map/" + map.getId() + ".yml");
-        map.getMembers().clear();
-        YamlConfiguration yaml = parseYaml(map);
-        try {
-            yaml.save(file);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void loadMap() {
-        checkFile();
-        if (file == null) return;
-        getMapHashMap().clear();
-        for (File file1 : Objects.requireNonNull(file.listFiles())) {
-            if (file1.getName().endsWith(".yml")) {
-                String fileName = file1.getName().replace(".yml", "");
-                int id = Integer.parseInt(fileName);
-                YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file1);
-                MobEscapeMap map = parseMap(yaml);
-                getMapHashMap().put(id, map);
-            }
-        }
-    }
-
-    public static void loadMap(MobEscapeMap map) {
-        checkFile();
-        if (file == null) return;
-        for (File file1 : Objects.requireNonNull(file.listFiles())) {
-            if (file1.getName().equalsIgnoreCase(map.getId() + ".yml")) {
-                String fileName = file1.getName().replace(".yml", "");
-                int id = Integer.parseInt(fileName);
-                YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file1);
-                getMapHashMap().put(id, parseMap(yaml));
-                return;
-            }
-        }
-    }
-
-    public static YamlConfiguration parseYaml(MobEscapeMap map){
-        Gson gson = new Gson();
-        YamlConfiguration yaml = new YamlConfiguration();
-        yaml.set("data", gson.toJson(map));
-        return yaml;
-    }
-
-    public static MobEscapeMap parseMap(YamlConfiguration yaml){
-        Gson gson = new Gson();
-        return gson.fromJson(yaml.getString("data"), MobEscapeMap.class);
-    }
-
-    public static int getNewId() {
-        int id = 0;
-        checkFile();
-        while (true) {
-            if (!getMapHashMap().containsKey(id)) return id;
-            id++;
-        }
-    }
-
-    public static MobEscapeMap getEditMap(Player player) {
-        if (!player.isOp()) return null;
-        if (!getEditingArena().containsKey(player)) return null;
-        return getEditingArena().get(player);
-    }
-
-    public static void setEditingMap(Player player, MobEscapeMap map) {
-        getEditingArena().put(player, map);
     }
 
 }
