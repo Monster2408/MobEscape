@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import xyz.mlserver.mobescape.MobEscape;
+import xyz.mlserver.mobescape.utils.game.GamaPhase;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
 import java.io.File;
@@ -193,5 +194,5 @@ public class MobEscapeAPI {
         setCountdownTaskMap(map, task);
     }
 
-
+    private static HashMap<MobEscapeMap, GamaPhase> gamePhaseMap;
 }
