@@ -155,8 +155,8 @@ public class MobEscapeAPI {
             @Override
             public void run() {
                 if (map.getArenaCountDownTimer() <= 0) {
-                    startGame(map);
                     cancel();
+                    startGame(map);
                     return;
                 }
                 for (Player all : Bukkit.getOnlinePlayers()) {
