@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import xyz.mlserver.mobescape.MobEscape;
+import xyz.mlserver.mobescape.utils.bukkit.ActionBar;
 import xyz.mlserver.mobescape.utils.game.GamePhase;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
@@ -175,22 +176,35 @@ public class MobEscapeAPI {
 
     public static void startGame(MobEscapeMap map) {
         if (map.getMembers().size() < map.getMinPlayer()) return;
-        if (map.getDefaultGameTime() > -1) return;
-        map.setDefaultGameTime(map.getDefaultGameTime());
+        map.setGameTime(-10.0*map.getDefaultCountDownTime());
+        getGamePhaseMap().put(map, GamePhase.READY);
         BukkitTask task = new BukkitRunnable() {
+            int time;
             @Override
             public void run() {
-                if (map.getDefaultGameTime() <= 0) {
-                    // endGame(map);
-                    cancel();
-                    return;
-                }
-                for (Player all : Bukkit.getOnlinePlayers()) {
-                    if (map.getMembers().contains(all.getUniqueId().toString())) {
-                        all.setLevel(map.getDefaultGameTime());
+                time = (int) Math.floor(map.getGameTime());
+                if (time < 0) {
+                    for (Player all : Bukkit.getOnlinePlayers()) {
+                        if (map.getMembers().contains(all.getUniqueId().toString())) {
+                            ActionBar.send(all, "ゲーム開始まで" + time*-1 + "秒");
+                        }
+                    }
+                } else if (getGamePhaseMap().get(map) == GamePhase.READY) {
+                    getGamePhaseMap().put(map, GamePhase.GAME);
+                    for (Player all : Bukkit.getOnlinePlayers()) {
+                        if (map.getMembers().contains(all.getUniqueId().toString())) {
+                            ActionBar.send(all, "ゲーム開始まで" + map.getGameTime() + "秒");
+                            all.sendTitle("開始", null, 0, 40, 4);
+                        }
+                    }
+                } else {
+                    for (Player all : Bukkit.getOnlinePlayers()) {
+                        if (map.getMembers().contains(all.getUniqueId().toString())) {
+                            ActionBar.send(all, "ゲーム開始まで" + map.getGameTime() + "秒");
+                        }
                     }
                 }
-                map.setDefaultGameTime(map.getDefaultGameTime() - 1);
+                map.setGameTime(map.getGameTime() + 0.1);
             }
         }.runTaskTimer(MobEscape.getPlugin(), 0, 2);
         setCountdownTaskMap(map, task);

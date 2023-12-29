@@ -29,8 +29,7 @@ public class MobEscapeMap {
     private Integer defaultCountDownTime;
     private Integer arenaCountDownTime;
     private Integer defaultArenaCountDownTime;
-    private Integer gameTime;
-    private Integer defaultGameTime;
+    private Double gameTime;
 
     public MobEscapeMap(String name, int id) {
         this.name = name;
@@ -48,25 +47,16 @@ public class MobEscapeMap {
         this.goalPos2 = null;
         this.defaultArenaCountDownTime = 30;
         this.arenaCountDownTime = -1;
-        this.defaultCountDownTime = 10;
+        this.defaultCountDownTime = 3;
         this.countDownTime = -1;
-        this.defaultGameTime = 10;
-        this.gameTime = -1;
+        this.gameTime = 0.0;
     }
 
-    public Integer getDefaultGameTime() {
-        return defaultGameTime;
-    }
-
-    public void setDefaultGameTime(Integer defaultGameTime) {
-        this.defaultGameTime = defaultGameTime;
-    }
-
-    public Integer getGameTime() {
+    public Double getGameTime() {
         return gameTime;
     }
 
-    public void setGameTime(Integer gameTime) {
+    public void setGameTime(Double gameTime) {
         this.gameTime = gameTime;
     }
 
