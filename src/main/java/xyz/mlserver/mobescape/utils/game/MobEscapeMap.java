@@ -36,6 +36,8 @@ public class MobEscapeMap {
     private Integer countDownTime;
     private Integer arenaCountDownTimer;
     private Integer arenaCountDownTime;
+    private Integer gameTimer;
+    private Integer gameTime;
 
     public MobEscapeMap(String name, int id) {
         this.name = name;
@@ -53,6 +55,26 @@ public class MobEscapeMap {
         this.goalPos2 = null;
         this.arenaCountDownTime = 30;
         this.arenaCountDownTimer = -1;
+        this.countDownTime = 10;
+        this.countDownTimer = -1;
+        this.gameTime = 10;
+        this.gameTimer = -1;
+    }
+
+    public Integer getGameTime() {
+        return gameTime;
+    }
+
+    public void setGameTime(Integer gameTime) {
+        this.gameTime = gameTime;
+    }
+
+    public Integer getGameTimer() {
+        return gameTimer;
+    }
+
+    public void setGameTimer(Integer gameTimer) {
+        this.gameTimer = gameTimer;
     }
 
     public Integer getArenaCountDownTime() {

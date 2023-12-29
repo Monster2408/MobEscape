@@ -149,11 +149,13 @@ public class MobEscapeAPI {
      */
     public static void startArenaCountDown(MobEscapeMap map) {
         if (map.getMinPlayer() > map.getMembers().size()) return;
+        if (map.getCountDownTimer() > -1) return;
         map.setArenaCountDownTimer(map.getArenaCountDownTime());
         BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
                 if (map.getArenaCountDownTimer() <= 0) {
+                    startGame(map);
                     cancel();
                     return;
                 }
@@ -163,6 +165,29 @@ public class MobEscapeAPI {
                     }
                 }
                 map.setArenaCountDownTimer(map.getArenaCountDownTimer() - 1);
+            }
+        }.runTaskTimer(MobEscape.getPlugin(), 0, 2);
+        setCountdownTaskMap(map, task);
+    }
+
+    public static void startGame(MobEscapeMap map) {
+        if (map.getMembers().size() < map.getMinPlayer()) return;
+        if (map.getGameTime() > -1) return;
+        map.setGameTime(map.getGameTime());
+        BukkitTask task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (map.getGameTime() <= 0) {
+                    // endGame(map);
+                    cancel();
+                    return;
+                }
+                for (Player all : Bukkit.getOnlinePlayers()) {
+                    if (map.getMembers().contains(all.getUniqueId().toString())) {
+                        all.setLevel(map.getGameTime());
+                    }
+                }
+                map.setGameTime(map.getGameTime() - 1);
             }
         }.runTaskTimer(MobEscape.getPlugin(), 0, 2);
         setCountdownTaskMap(map, task);

@@ -3,6 +3,7 @@ version: '${project.version}'
 main: xyz.mlserver.mobescape.MobEscape
 depend:
     - WorldEdit
+    - Citizens
 
 commands:
     mobescape:
