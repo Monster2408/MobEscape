@@ -150,22 +150,24 @@ public class MobEscapeAPI {
      */
     public static void startArenaCountDown(MobEscapeMap map) {
         if (map.getMinPlayer() > map.getMembers().size()) return;
-        if (map.getCountDownTimer() > -1) return;
-        map.setArenaCountDownTimer(map.getArenaCountDownTime());
+        if (map.getCountDownTime() > -1) return;
+        if (!getGamePhaseMap().containsKey(map)) return;
+        map.setArenaCountDownTime(map.getDefaultArenaCountDownTime());
+        getGamePhaseMap().put(map, GamePhase.ARENA);
         BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
-                if (map.getArenaCountDownTimer() <= 0) {
+                if (map.getArenaCountDownTime() <= 0) {
                     cancel();
                     startGame(map);
                     return;
                 }
                 for (Player all : Bukkit.getOnlinePlayers()) {
                     if (map.getMembers().contains(all.getUniqueId().toString())) {
-                        all.setLevel(map.getArenaCountDownTimer());
+                        all.setLevel(map.getArenaCountDownTime());
                     }
                 }
-                map.setArenaCountDownTimer(map.getArenaCountDownTimer() - 1);
+                map.setArenaCountDownTime(map.getArenaCountDownTime() - 1);
             }
         }.runTaskTimer(MobEscape.getPlugin(), 0, 2);
         setCountdownTaskMap(map, task);
@@ -173,26 +175,31 @@ public class MobEscapeAPI {
 
     public static void startGame(MobEscapeMap map) {
         if (map.getMembers().size() < map.getMinPlayer()) return;
-        if (map.getGameTime() > -1) return;
-        map.setGameTime(map.getGameTime());
+        if (map.getDefaultGameTime() > -1) return;
+        map.setDefaultGameTime(map.getDefaultGameTime());
         BukkitTask task = new BukkitRunnable() {
             @Override
             public void run() {
-                if (map.getGameTime() <= 0) {
+                if (map.getDefaultGameTime() <= 0) {
                     // endGame(map);
                     cancel();
                     return;
                 }
                 for (Player all : Bukkit.getOnlinePlayers()) {
                     if (map.getMembers().contains(all.getUniqueId().toString())) {
-                        all.setLevel(map.getGameTime());
+                        all.setLevel(map.getDefaultGameTime());
                     }
                 }
-                map.setGameTime(map.getGameTime() - 1);
+                map.setDefaultGameTime(map.getDefaultGameTime() - 1);
             }
         }.runTaskTimer(MobEscape.getPlugin(), 0, 2);
         setCountdownTaskMap(map, task);
     }
 
     private static HashMap<MobEscapeMap, GamePhase> gamePhaseMap;
+
+    public static HashMap<MobEscapeMap, GamePhase> getGamePhaseMap() {
+        if (gamePhaseMap == null) gamePhaseMap = new HashMap<>();
+        return gamePhaseMap;
+    }
 }

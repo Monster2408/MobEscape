@@ -1,20 +1,13 @@
 package xyz.mlserver.mobescape.utils.game;
 
-import com.google.gson.Gson;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
-import xyz.mlserver.mobescape.MobEscape;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 public class MobEscapeMap {
 
@@ -32,12 +25,12 @@ public class MobEscapeMap {
     private String pos2;
     private String goalPos1;
     private String goalPos2;
-    private Integer countDownTimer;
     private Integer countDownTime;
-    private Integer arenaCountDownTimer;
+    private Integer defaultCountDownTime;
     private Integer arenaCountDownTime;
-    private Integer gameTimer;
+    private Integer defaultArenaCountDownTime;
     private Integer gameTime;
+    private Integer defaultGameTime;
 
     public MobEscapeMap(String name, int id) {
         this.name = name;
@@ -53,12 +46,20 @@ public class MobEscapeMap {
         this.path = new HashMap<>();
         this.goalPos1 = null;
         this.goalPos2 = null;
-        this.arenaCountDownTime = 30;
-        this.arenaCountDownTimer = -1;
-        this.countDownTime = 10;
-        this.countDownTimer = -1;
-        this.gameTime = 10;
-        this.gameTimer = -1;
+        this.defaultArenaCountDownTime = 30;
+        this.arenaCountDownTime = -1;
+        this.defaultCountDownTime = 10;
+        this.countDownTime = -1;
+        this.defaultGameTime = 10;
+        this.gameTime = -1;
+    }
+
+    public Integer getDefaultGameTime() {
+        return defaultGameTime;
+    }
+
+    public void setDefaultGameTime(Integer defaultGameTime) {
+        this.defaultGameTime = defaultGameTime;
     }
 
     public Integer getGameTime() {
@@ -69,12 +70,12 @@ public class MobEscapeMap {
         this.gameTime = gameTime;
     }
 
-    public Integer getGameTimer() {
-        return gameTimer;
+    public Integer getDefaultArenaCountDownTime() {
+        return defaultArenaCountDownTime;
     }
 
-    public void setGameTimer(Integer gameTimer) {
-        this.gameTimer = gameTimer;
+    public void setDefaultArenaCountDownTime(Integer defaultArenaCountDownTime) {
+        this.defaultArenaCountDownTime = defaultArenaCountDownTime;
     }
 
     public Integer getArenaCountDownTime() {
@@ -85,12 +86,12 @@ public class MobEscapeMap {
         this.arenaCountDownTime = arenaCountDownTime;
     }
 
-    public Integer getArenaCountDownTimer() {
-        return arenaCountDownTimer;
+    public Integer getDefaultCountDownTime() {
+        return defaultCountDownTime;
     }
 
-    public void setArenaCountDownTimer(Integer arenaCountDownTimer) {
-        this.arenaCountDownTimer = arenaCountDownTimer;
+    public void setDefaultCountDownTime(Integer defaultCountDownTime) {
+        this.defaultCountDownTime = defaultCountDownTime;
     }
 
     public Integer getCountDownTime() {
@@ -99,14 +100,6 @@ public class MobEscapeMap {
 
     public void setCountDownTime(Integer countDownTime) {
         this.countDownTime = countDownTime;
-    }
-
-    public Integer getCountDownTimer() {
-        return countDownTimer;
-    }
-
-    public void setCountDownTimer(Integer countDownTimer) {
-        this.countDownTimer = countDownTimer;
     }
 
     public Location getGoalPos1() {
