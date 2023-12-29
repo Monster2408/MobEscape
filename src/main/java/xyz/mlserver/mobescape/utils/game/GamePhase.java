@@ -4,5 +4,6 @@ public enum GamePhase {
     ARENA,
     READY,
     GAME,
-    END
+    END,
+    STOP
 }

@@ -2,11 +2,14 @@ package xyz.mlserver.mobescape.utils.api;
 
 import com.google.gson.Gson;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import xyz.mlserver.mls.event.CountdownAPI;
 import xyz.mlserver.mobescape.MobEscape;
 import xyz.mlserver.mobescape.utils.bukkit.ActionBar;
 import xyz.mlserver.mobescape.utils.game.GamePhase;
@@ -170,7 +173,7 @@ public class MobEscapeAPI {
                 }
                 map.setArenaCountDownTime(map.getArenaCountDownTime() - 1);
             }
-        }.runTaskTimer(MobEscape.getPlugin(), 0, 2);
+        }.runTaskTimer(MobEscape.getPlugin(), 0, 20);
         setCountdownTaskMap(map, task);
     }
 
@@ -180,27 +183,39 @@ public class MobEscapeAPI {
         getGamePhaseMap().put(map, GamePhase.READY);
         BukkitTask task = new BukkitRunnable() {
             int time;
+            int countdown = -1;
             @Override
             public void run() {
+                if (getGamePhaseMap().get(map) == GamePhase.STOP) {
+                    cancel();
+                    return;
+                }
                 time = (int) Math.floor(map.getGameTime());
                 if (time < 0) {
                     for (Player all : Bukkit.getOnlinePlayers()) {
                         if (map.getMembers().contains(all.getUniqueId().toString())) {
                             ActionBar.send(all, "ゲーム開始まで" + time*-1 + "秒");
+                            if ((time == 3 || time == 2 || time == 1) && countdown != time) {
+                                countdown = time;
+                                all.playSound(all.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 10, 1);
+                                if (time == 3) all.sendTitle(ChatColor.DARK_GREEN + "❸", ChatColor.GRAY + "開始まで・・・", 0, 30, 0);
+                                if (time == 2) all.sendTitle(ChatColor.GOLD + "❷", ChatColor.GRAY + "開始まで・・・", 0, 30, 0);
+                                if (time == 1) all.sendTitle(ChatColor.DARK_RED + "❶", ChatColor.GRAY + "開始まで・・・", 0, 30, 0);
+                            }
                         }
                     }
                 } else if (getGamePhaseMap().get(map) == GamePhase.READY) {
                     getGamePhaseMap().put(map, GamePhase.GAME);
                     for (Player all : Bukkit.getOnlinePlayers()) {
                         if (map.getMembers().contains(all.getUniqueId().toString())) {
-                            ActionBar.send(all, "ゲーム開始まで" + map.getGameTime() + "秒");
+                            ActionBar.send(all, MainAPI.getMinuteTime(map.getGameTime()));
                             all.sendTitle("開始", null, 0, 40, 4);
                         }
                     }
                 } else {
                     for (Player all : Bukkit.getOnlinePlayers()) {
                         if (map.getMembers().contains(all.getUniqueId().toString())) {
-                            ActionBar.send(all, "ゲーム開始まで" + map.getGameTime() + "秒");
+                            ActionBar.send(all, MainAPI.getMinuteTime(map.getGameTime()));
                         }
                     }
                 }
