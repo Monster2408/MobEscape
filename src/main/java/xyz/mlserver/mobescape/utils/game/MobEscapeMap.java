@@ -1,8 +1,12 @@
 package xyz.mlserver.mobescape.utils.game;
 
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import xyz.mlserver.mobescape.utils.WorldEditHook;
+import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
 
 import java.util.ArrayList;
@@ -30,6 +34,7 @@ public class MobEscapeMap {
     private Integer arenaCountDownTime;
     private Integer defaultArenaCountDownTime;
     private Double gameTime;
+    private List<String> signLocList;
 
     public MobEscapeMap(String name, int id) {
         this.name = name;
@@ -50,6 +55,16 @@ public class MobEscapeMap {
         this.defaultCountDownTime = 3;
         this.countDownTime = -1;
         this.gameTime = 0.0;
+        this.signLocList = new ArrayList<>();
+    }
+
+    public void setSignLocList(List<String> signLocList) {
+        this.signLocList = signLocList;
+    }
+
+    public List<String> getSignLocList() {
+        if (signLocList == null) signLocList = new ArrayList<>();
+        return signLocList;
     }
 
     public Double getGameTime() {
@@ -61,6 +76,7 @@ public class MobEscapeMap {
     }
 
     public Integer getDefaultArenaCountDownTime() {
+        if (defaultArenaCountDownTime == null) defaultArenaCountDownTime = 30;
         return defaultArenaCountDownTime;
     }
 
@@ -77,6 +93,7 @@ public class MobEscapeMap {
     }
 
     public Integer getDefaultCountDownTime() {
+        if (defaultCountDownTime == null) defaultCountDownTime = 3;
         return defaultCountDownTime;
     }
 
@@ -85,6 +102,7 @@ public class MobEscapeMap {
     }
 
     public Integer getCountDownTime() {
+        if (countDownTime == null) countDownTime = -1;
         return countDownTime;
     }
 
@@ -240,10 +258,55 @@ public class MobEscapeMap {
         return members;
     }
 
+    public boolean isCompleted() {
+        if (getPos1() == null) return false;
+        if (getPos2() == null) return false;
+        if (getGoalPos1() == null) return false;
+        if (getGoalPos2() == null) return false;
+        if (getArenaLobby() == null) return false;
+        if (getSpawns() == null || getSpawns().isEmpty()) return false;
+        if (getPath().isEmpty()) return false;
+        if (MobEscapeAPI.getLobby() == null) return false;
+        return WorldEditHook.getSchematicFile(this).exists();
+    }
+
+    public boolean isEnd() {
+        if (getMembers().isEmpty()) return true;
+        int spectate = 0;
+        for (Player all : Bukkit.getOnlinePlayers()) {
+            if (getMembers().contains(all.getUniqueId().toString())) {
+                if (all.getGameMode() == GameMode.SPECTATOR) spectate++;
+            }
+        }
+        if (spectate >= getMembers().size()) return true;
+        return false;
+    }
+
     public void join(Player player) {
         if (getArenaLobby() == null) return;
         addMember(player);
         player.teleport(getArenaLobby());
+        MobEscapeAPI.startArenaCountDown(this);
+    }
+
+    public void leave(Player player) {
+        String uuidStr = player.getUniqueId().toString();
+        if (MobEscapeAPI.getLobby() == null) return;
+        if (!getMembers().contains(uuidStr)) return;
+        removeMember(player);
+        player.teleport(MobEscapeAPI.getLobby().clone());
+        if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
+            MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.STOP);
+        }
+    }
+
+    public void goal(Player player) {
+        if (!getMembers().contains(player.getUniqueId().toString())) return;
+        player.setGameMode(GameMode.SPECTATOR);
+        player.sendMessage("§aおめでとうございます！あなたはゴールしました！");
+        if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
+            MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.END);
+        }
     }
 
 }

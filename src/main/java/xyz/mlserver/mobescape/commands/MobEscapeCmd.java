@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.mlserver.java.Log;
 import xyz.mlserver.mobescape.MobEscape;
+import xyz.mlserver.mobescape.utils.WorldEditHook;
 import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 import xyz.mlserver.mobescape.utils.api.MsgAPI;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
@@ -32,6 +33,7 @@ public class MobEscapeCmd implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
+        String uuidStr = player.getUniqueId().toString();
         if (args.length == 0) {
             player.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方が間違っています。");
             player.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方: /mobescape <join|leave|start|stop|setspawn|setarena|setlobby");
@@ -40,6 +42,15 @@ public class MobEscapeCmd implements CommandExecutor {
 
         if (args[0].equalsIgnoreCase("gui")) {
             MobEscapeGUI.open(player);
+            return true;
+        } else if (args[0].equalsIgnoreCase("leave")) {
+            for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
+                if (map.getMembers().contains(uuidStr)) {
+                    map.leave(player);
+                    return true;
+                }
+            }
+            player.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lあなたはゲームに参加していません。");
             return true;
         }
 
@@ -279,7 +290,8 @@ public class MobEscapeCmd implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("save")) {
             if (args.length > 1) {
                 if (args[1].equalsIgnoreCase("confirm")) {
-                    MobEscapeAPI.saveMap();
+                    if (map == null) MobEscapeAPI.saveMap();
+                    else MobEscapeAPI.saveMap(map);
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップを保存しました。");
                 }
             } else {
@@ -288,6 +300,13 @@ public class MobEscapeCmd implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("edit")) {
             MobEscapeGUI.openEdit(map, player);
+        } else if (args[0].equalsIgnoreCase("load")) {
+            if (map == null) {
+                sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");
+            } else {
+                if (WorldEditHook.loadSchematic(map.getId(), map.getPos1())) sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップをロードしました。");
+                else sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップのロードに失敗しました。");
+            }
         }
         return false;
     }

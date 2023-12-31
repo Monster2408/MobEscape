@@ -16,4 +16,14 @@ public class MainAPI {
         return String.format("%02d", min) + ":" + String.format("%02d", sec) + "." + msec;
     }
 
+    private static boolean debug = false;
+
+    public static void setDebug(boolean debug) {
+        MainAPI.debug = debug;
+    }
+
+    public static boolean isDebug() {
+        return debug;
+    }
+
 }
