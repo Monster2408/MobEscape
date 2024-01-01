@@ -34,13 +34,8 @@ public class MobEscapeCmd implements CommandExecutor {
         }
         Player player = (Player) sender;
         String uuidStr = player.getUniqueId().toString();
-        if (args.length == 0) {
-            player.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方が間違っています。");
-            player.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方: /mobescape <join|leave|start|stop|setspawn|setarena|setlobby");
-            return true;
-        }
 
-        if (args[0].equalsIgnoreCase("gui")) {
+        if (args.length == 0 || args[0].equalsIgnoreCase("gui") || args[0].equalsIgnoreCase("join")) {
             MobEscapeGUI.open(player);
             return true;
         } else if (args[0].equalsIgnoreCase("leave")) {
@@ -116,6 +111,20 @@ public class MobEscapeCmd implements CommandExecutor {
                         }
                     } else {
                         sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l最小プレイヤー数を入力してください。");
+                    }
+                } else if (args[1].equalsIgnoreCase("under") || args[1].equalsIgnoreCase("undery")) {
+                    if (map == null) {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");
+                    } else if (args.length > 2) {
+                        try {
+                            double min = Double.parseDouble(args[2]);
+                            map.setUnderY(min);
+                            sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lY座標の制限を「" + String.format("%.1f", min) + "」に設定しました。");
+                        } catch (NumberFormatException e) {
+                            sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l数字を入力してください。");
+                        }
+                    } else {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l最大プレイヤー数を入力してください。");
                     }
                 } else if (args[1].equalsIgnoreCase("icon")) {
                     if (map == null) {

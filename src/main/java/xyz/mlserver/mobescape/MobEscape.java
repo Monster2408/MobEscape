@@ -3,6 +3,7 @@ package xyz.mlserver.mobescape;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.mlserver.mc.util.CustomConfiguration;
 import xyz.mlserver.mobescape.commands.MobEscapeCmd;
+import xyz.mlserver.mobescape.commands.MobEscapeTab;
 import xyz.mlserver.mobescape.listeners.BukkitBlockClickListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerJoinListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerMoveListener;
@@ -39,6 +40,7 @@ public final class MobEscape extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new MEGUIClickListener(), this);
 
         getCommand("mobescape").setExecutor(new MobEscapeCmd());
+        getCommand("mobescape").setTabCompleter(new MobEscapeTab());
 
         plugin = this;
 

@@ -33,6 +33,7 @@ public class MobEscapeMap {
     private Integer defaultCountDownTime;
     private Integer defaultArenaCountDownTime;
     private List<String> signLocList;
+    private Double underY;
 
     public MobEscapeMap(String name, int id) {
         this.name = name;
@@ -50,6 +51,16 @@ public class MobEscapeMap {
         this.defaultArenaCountDownTime = 30;
         this.defaultCountDownTime = 3;
         this.signLocList = new ArrayList<>();
+        this.underY = 0.0;
+    }
+
+    public Double getUnderY() {
+        if (underY == null) underY = 0.0;
+        return underY;
+    }
+
+    public void setUnderY(Double underY) {
+        this.underY = underY;
     }
 
     public void setSignLocList(List<String> signLocList) {
@@ -273,6 +284,38 @@ public class MobEscapeMap {
         player.sendMessage("§aおめでとうございます！あなたはゴールしました！");
         if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
             MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.END);
+        }
+    }
+
+    public void death(Player player, DeathReason reason) {
+        if (!MobEscapeAPI.getMembers(this).contains(player)) return;
+        player.setGameMode(GameMode.SPECTATOR);
+        player.sendMessage("§cあなたは死亡しました。理由: " + reason.name());
+        if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
+            MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.END);
+        }
+    }
+
+    public enum DeathReason {
+        UNDER_Y(0, "範囲外に落ちた"),
+        FALL(1, "奈落に落ちた"),
+        MOB_DAMAGE(2, "モンスターに倒された"),
+        ;
+
+        DeathReason(int id, String reason) {
+            this.id = id;
+            this.reason = reason;
+        }
+
+        private final int id;
+        public int getId() {
+            return id;
+        }
+
+        private final String reason;
+
+        public String getReason() {
+            return reason;
         }
     }
 
