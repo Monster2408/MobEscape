@@ -12,7 +12,6 @@ import xyz.mlserver.mobescape.listeners.BukkitSignChangeListener;
 import xyz.mlserver.mobescape.listeners.MEGUIClickListener;
 import xyz.mlserver.mobescape.utils.api.MainAPI;
 import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
-import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
 public final class MobEscape extends JavaPlugin {
 
