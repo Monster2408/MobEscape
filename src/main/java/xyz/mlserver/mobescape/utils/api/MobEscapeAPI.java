@@ -218,14 +218,12 @@ public class MobEscapeAPI {
         return countdownTaskMap;
     }
 
-    private static final List<Material> signTypeList = Arrays.asList(
-            Material.SIGN,
-            Material.SIGN_POST,
-            Material.WALL_SIGN
-    );
-
     public static List<Material> getSignTypeList() {
-        return signTypeList;
+        return Arrays.asList(
+                Material.SIGN,
+                Material.SIGN_POST,
+                Material.WALL_SIGN
+        );
     }
 
     public static void addSign(MobEscapeMap map, Location blockLoc) {
@@ -268,6 +266,8 @@ public class MobEscapeAPI {
         getGamePhaseMap().put(map, GamePhase.WAITING);
         WorldEditHook.loadSchematic(map.getId(), map.getPos1());
         getGamePhaseMap().put(map, GamePhase.ARENA);
+        getGoalPlayersMap().put(map, new ArrayList<>());
+        getMembersMap().put(map, new ArrayList<>());
     }
 
     /**
