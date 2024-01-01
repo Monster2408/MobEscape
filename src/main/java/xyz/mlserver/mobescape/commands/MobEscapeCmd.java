@@ -45,7 +45,7 @@ public class MobEscapeCmd implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("leave")) {
             for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
-                if (map.getMembers().contains(uuidStr)) {
+                if (MobEscapeAPI.getMembers(map).contains(player)) {
                     map.leave(player);
                     return true;
                 }

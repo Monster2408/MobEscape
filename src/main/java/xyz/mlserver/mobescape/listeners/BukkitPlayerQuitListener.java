@@ -12,9 +12,8 @@ public class BukkitPlayerQuitListener implements Listener {
     @EventHandler
     public void on(PlayerQuitEvent e) {
         Player player = e.getPlayer();
-        String uuidStr = player.getUniqueId().toString();
         for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
-            if (map.getMembers().contains(uuidStr)) {
+            if (MobEscapeAPI.getMembers(map).contains(player)) {
                 map.leave(player);
             }
         }

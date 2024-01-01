@@ -24,7 +24,7 @@ public class BukkitBlockClickListener implements Listener {
         String leaveLine0Text = MobEscapeAPI.getLeaveSignText(0);
         if (leaveLine0Text != null && leaveLine0Text.equalsIgnoreCase(sign.getLine(0))) {
             for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
-                if (map.getMembers().contains(uuidStr)) {
+                if (MobEscapeAPI.getMembers(map).contains(player)) {
                     map.leave(player);
                     return;
                 }

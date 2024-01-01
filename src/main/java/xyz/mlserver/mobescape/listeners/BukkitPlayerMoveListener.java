@@ -16,7 +16,7 @@ public class BukkitPlayerMoveListener implements Listener {
         Player player = e.getPlayer();
         for (MobEscapeMap map: MobEscapeAPI.getMapHashMap().values()) {
             if (!MobEscapeAPI.getGamePhaseMap().containsKey(map)) continue;
-            if (!map.getMembers().contains(player.getUniqueId().toString())) continue;
+            if (!MobEscapeAPI.getMembers(map).contains(player)) continue;
             if (MobEscapeAPI.getGamePhaseMap().get(map) == GamePhase.READY) {
                 if (e.getFrom().getX() != e.getTo().getX() || e.getFrom().getZ() != e.getTo().getZ()) {
                     e.setCancelled(true);

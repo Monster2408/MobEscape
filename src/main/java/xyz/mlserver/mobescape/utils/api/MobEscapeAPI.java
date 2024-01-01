@@ -27,6 +27,54 @@ import java.util.Objects;
 
 public class MobEscapeAPI {
 
+    private static HashMap<MobEscapeMap, List<Player>> members;
+
+    public static HashMap<MobEscapeMap, List<Player>> getMembersMap(){
+        if (members == null) members = new HashMap<>();
+        return members;
+    }
+
+    public static List<Player> getMembers(MobEscapeMap map){
+        getMembersMap().putIfAbsent(map, new ArrayList<>());
+        return getMembersMap().get(map);
+    }
+
+    private static HashMap<MobEscapeMap, Integer> arenaCountDownTime;
+
+    public static HashMap<MobEscapeMap, Integer> getArenaCountDownTimeMap(){
+        if (arenaCountDownTime == null) arenaCountDownTime = new HashMap<>();
+        return arenaCountDownTime;
+    }
+
+    public static Integer getArenaCountDownTime(MobEscapeMap map){
+        getArenaCountDownTimeMap().putIfAbsent(map, map.getDefaultArenaCountDownTime());
+        return getArenaCountDownTimeMap().get(map);
+    }
+
+    private static HashMap<MobEscapeMap, Double> gameTime;
+
+    public static HashMap<MobEscapeMap, Double> getGameTimeMap(){
+        if (gameTime == null) gameTime = new HashMap<>();
+        return gameTime;
+    }
+
+    public static Double getGameTime(MobEscapeMap map){
+        getGameTimeMap().putIfAbsent(map, 0.0);
+        return getGameTimeMap().get(map);
+    }
+
+    private static HashMap<MobEscapeMap, List<Player>> goalPlayers;
+
+    public static HashMap<MobEscapeMap, List<Player>> getGoalPlayersMap(){
+        if (goalPlayers == null) goalPlayers = new HashMap<>();
+        return goalPlayers;
+    }
+
+    public static List<Player> getGoalPlayers(MobEscapeMap map){
+        getGoalPlayersMap().putIfAbsent(map, new ArrayList<>());
+        return getGoalPlayersMap().get(map);
+    }
+
     private static Location lobby = null;
 
     public static Location getLobby() {
@@ -81,7 +129,7 @@ public class MobEscapeAPI {
     public static void saveMap(MobEscapeMap map) {
         checkFile();
         File file = new File(MobEscape.getPlugin().getDataFolder() + "/map/" + map.getId() + ".yml");
-        map.getMembers().clear();
+        MobEscapeAPI.getMembersMap().put(map, new ArrayList<>());
         YamlConfiguration yaml = parseYaml(map);
         try {
             yaml.save(file);
@@ -193,7 +241,7 @@ public class MobEscapeAPI {
         if (text.contains("%id%")) text = text.replace("%id%", String.valueOf(map.getId()));
         if (text.contains("%max%")) text = text.replace("%max%", String.valueOf(map.getMaxPlayer()));
         if (text.contains("%min%")) text = text.replace("%min%", String.valueOf(map.getMinPlayer()));
-        if (text.contains("%count%")) text = text.replace("%count%", String.valueOf(map.getMembers().size()));
+        if (text.contains("%count%")) text = text.replace("%count%", String.valueOf(MobEscapeAPI.getMembers(map).size()));
         return text;
     }
 
@@ -228,50 +276,51 @@ public class MobEscapeAPI {
     public static void startArenaCountDown(MobEscapeMap map) {
         if (!map.isCompleted()) {
             if (MainAPI.isDebug()) Log.debug("Map is not completed.");
-            return;
-        }
-        if (map.getMinPlayer() > map.getMembers().size()) {
+        } else if (map.getMinPlayer() > MobEscapeAPI.getMembers(map).size()) {
             if (MainAPI.isDebug()) Log.debug("Map is not enough player.");
-            return;
-        }
-        if (getCountdownTaskMap().containsKey(map)) {
+        } else if (getCountdownTaskMap().containsKey(map)) {
             if (MainAPI.isDebug()) Log.debug("Map is already started.");
-            return;
-        }
-        map.setArenaCountDownTime(map.getDefaultArenaCountDownTime());
-        getGamePhaseMap().put(map, GamePhase.ARENA);
-        BukkitTask task = new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (map.getArenaCountDownTime() <= 0) {
-                    cancel();
-                    startGame(map);
-                    return;
-                }
-                if (getGamePhaseMap().get(map) == GamePhase.STOP) {
-                    setCountdownTaskMap(map, null);
-                    resetGame(map);
-                    cancel();
-                    return;
-                }
-                for (Player all : Bukkit.getOnlinePlayers()) {
-                    if (map.getMembers().contains(all.getUniqueId().toString())) {
-                        ActionBar.send(all, "[待機中]ゲーム開始まで" + map.getArenaCountDownTime() + "秒");
+        } else {
+            MobEscapeAPI.getArenaCountDownTimeMap().put(map, map.getDefaultArenaCountDownTime());
+            getGamePhaseMap().put(map, GamePhase.ARENA);
+            BukkitTask task = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (MobEscapeAPI.getArenaCountDownTime(map) <= 0) {
+                        cancel();
+                        startGame(map);
+                    } else if (getGamePhaseMap().get(map) == GamePhase.STOP) {
+                        setCountdownTaskMap(map, null);
+                        resetGame(map);
+                        cancel();
+                    } else {
+                        int time = MobEscapeAPI.getArenaCountDownTime(map);
+                        for (Player all : Bukkit.getOnlinePlayers()) {
+                            if (MobEscapeAPI.getMembers(map).contains(all)) {
+                                String colorTemp = ChatColor.GREEN + "" + ChatColor.BOLD;
+                                if (time % 2 == 0) colorTemp = ChatColor.RED + "" + ChatColor.BOLD;
+                                ActionBar.send(all, colorTemp + "[待機中]ゲーム開始まで" + time + "秒");
+                            }
+                        }
+                        MobEscapeAPI.getArenaCountDownTimeMap().put(map, time - 1);
                     }
                 }
-                map.setArenaCountDownTime(map.getArenaCountDownTime() - 1);
-            }
-        }.runTaskTimer(MobEscape.getPlugin(), 0, 20);
-        setCountdownTaskMap(map, task);
+            }.runTaskTimer(MobEscape.getPlugin(), 0, 20);
+            setCountdownTaskMap(map, task);
+        }
     }
 
+    /**
+     * アリーナ待機終了後に呼び出されます。
+     * @param map
+     */
     public static void startGame(MobEscapeMap map) {
-        if (map.getMembers().size() < map.getMinPlayer()) return;
-        map.setGameTime(-10.0*map.getDefaultCountDownTime());
+        if (MobEscapeAPI.getMembers(map).size() < map.getMinPlayer()) return;
+        MobEscapeAPI.getGameTimeMap().put(map, -1.0*map.getDefaultCountDownTime());
         getGamePhaseMap().put(map, GamePhase.READY);
         int temp = 0;
         for (Player all : Bukkit.getOnlinePlayers()) {
-            if (map.getMembers().contains(all.getUniqueId().toString())) {
+            if (MobEscapeAPI.getMembers(map).contains(all)) {
                 if (map.getSpawns().size() <= temp) temp = 0;
                 all.teleport(map.getSpawns().get(temp).clone());
                 temp++;
@@ -286,38 +335,44 @@ public class MobEscapeAPI {
                     setCountdownTaskMap(map, null);
                     resetGame(map);
                     cancel();
-                    return;
-                }
-                time = (int) Math.floor(map.getGameTime());
-                if (time < 0) {
-                    for (Player all : Bukkit.getOnlinePlayers()) {
-                        if (map.getMembers().contains(all.getUniqueId().toString())) {
-                            ActionBar.send(all, "ゲーム開始まで" + time*-1 + "秒");
-                            if ((time == 3 || time == 2 || time == 1) && countdown != time) {
-                                countdown = time;
-                                all.playSound(all.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 10, 1);
-                                if (time == 3) all.sendTitle(ChatColor.DARK_GREEN + "❸", ChatColor.GRAY + "開始まで・・・", 0, 30, 0);
-                                if (time == 2) all.sendTitle(ChatColor.GOLD + "❷", ChatColor.GRAY + "開始まで・・・", 0, 30, 0);
-                                if (time == 1) all.sendTitle(ChatColor.DARK_RED + "❶", ChatColor.GRAY + "開始まで・・・", 0, 30, 0);
+                } else if (getGamePhaseMap().get(map) == GamePhase.END) {
+                    setCountdownTaskMap(map, null);
+                    resetGame(map);
+                    cancel();
+                } else {
+                    time = (int) Math.floor(MobEscapeAPI.getGameTime(map));
+                    if (MainAPI.isDebug()) Log.debug("GameTime: " + time);
+                    if (time < 0) {
+                        for (Player all : Bukkit.getOnlinePlayers()) {
+                            if (MobEscapeAPI.getMembers(map).contains(all)) {
+                                ActionBar.send(all, "ゲーム開始まで" + time*-1 + "秒");
+                                if (MainAPI.isDebug()) Log.debug("CountDownTemp: " + countdown);
+                                if (time >= -3 && countdown != time) {
+                                    countdown = time;
+                                    all.playSound(all.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 10, 1);
+                                    if (time == -3) all.sendTitle(ChatColor.DARK_GREEN + "❸", ChatColor.GRAY + "開始まで・・・", 0, 30, 0);
+                                    if (time == -2) all.sendTitle(ChatColor.GOLD + "❷", ChatColor.GRAY + "開始まで・・・", 0, 30, 0);
+                                    if (time == -1) all.sendTitle(ChatColor.DARK_RED + "❶", ChatColor.GRAY + "開始まで・・・", 0, 30, 0);
+                                }
+                            }
+                        }
+                    } else if (getGamePhaseMap().get(map) == GamePhase.READY) {
+                        getGamePhaseMap().put(map, GamePhase.GAME);
+                        for (Player all : Bukkit.getOnlinePlayers()) {
+                            if (MobEscapeAPI.getMembers(map).contains(all)) {
+                                ActionBar.send(all, MainAPI.getMinuteTime(MobEscapeAPI.getGameTime(map)));
+                                all.sendTitle("開始", null, 0, 40, 4);
+                            }
+                        }
+                    } else {
+                        for (Player all : Bukkit.getOnlinePlayers()) {
+                            if (MobEscapeAPI.getMembers(map).contains(all)) {
+                                ActionBar.send(all, MainAPI.getMinuteTime(MobEscapeAPI.getGameTime(map)));
                             }
                         }
                     }
-                } else if (getGamePhaseMap().get(map) == GamePhase.READY) {
-                    getGamePhaseMap().put(map, GamePhase.GAME);
-                    for (Player all : Bukkit.getOnlinePlayers()) {
-                        if (map.getMembers().contains(all.getUniqueId().toString())) {
-                            ActionBar.send(all, MainAPI.getMinuteTime(map.getGameTime()));
-                            all.sendTitle("開始", null, 0, 40, 4);
-                        }
-                    }
-                } else {
-                    for (Player all : Bukkit.getOnlinePlayers()) {
-                        if (map.getMembers().contains(all.getUniqueId().toString())) {
-                            ActionBar.send(all, MainAPI.getMinuteTime(map.getGameTime()));
-                        }
-                    }
+                    MobEscapeAPI.getGameTimeMap().put(map, MobEscapeAPI.getGameTime(map) + 0.1);
                 }
-                map.setGameTime(map.getGameTime() + 0.1);
             }
         }.runTaskTimer(MobEscape.getPlugin(), 0, 2);
         setCountdownTaskMap(map, task);
