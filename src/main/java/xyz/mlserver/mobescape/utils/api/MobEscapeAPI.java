@@ -1,13 +1,22 @@
 package xyz.mlserver.mobescape.utils.api;
 
 import com.google.gson.Gson;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.ai.Navigator;
+import net.citizensnpcs.api.ai.NavigatorParameters;
+import net.citizensnpcs.api.trait.Trait;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import xyz.mlserver.java.Log;
@@ -17,6 +26,10 @@ import xyz.mlserver.mobescape.utils.bukkit.ActionBar;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
 import xyz.mlserver.mobescape.utils.game.GamePhase;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
+
+import net.citizensnpcs.api.npc.NPC;
+import xyz.mlserver.mobescape.utils.trait.MoveAndAttackTrait;
+import xyz.mlserver.mobescape.utils.trait.MoveAndBreakTrait;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -262,11 +275,42 @@ public class MobEscapeAPI {
         else getCountdownTaskMap().remove(map);
     }
 
+    private static HashMap<MobEscapeMap, NPC> mobMap;
+
+    public static HashMap<MobEscapeMap, NPC> getMobMap() {
+        if (mobMap == null) mobMap = new HashMap<>();
+        return mobMap;
+    }
+
+    public static void setMobMap(MobEscapeMap map, NPC entity) {
+        if (getMobMap().containsKey(map)) getMobMap().get(map).despawn();
+        getMobMap().put(map, entity);
+    }
+
+    public static void removeMob(MobEscapeMap map) {
+        if (getMobMap().containsKey(map)) getMobMap().get(map).despawn();
+        getMobMap().remove(map);
+    }
+
+    public static NPC getMob(MobEscapeMap map) {
+        if (!getMobMap().containsKey(map)) return null;
+        return getMobMap().get(map);
+    }
+
     public static void resetGame(MobEscapeMap map) {
+        if (MobEscapeAPI.getMob(map) != null) {
+            MobEscapeAPI.getMobMap().get(map).destroy();
+        }
+        MobEscapeAPI.getMobMap().remove(map);
         getGamePhaseMap().put(map, GamePhase.WAITING);
         WorldEditHook.loadSchematic(map.getId(), map.getPos1());
         getGamePhaseMap().put(map, GamePhase.ARENA);
         getGoalPlayersMap().put(map, new ArrayList<>());
+        for (Player all : getMembersMap().get(map)) {
+            all.teleport(MobEscapeAPI.getLobby());
+            all.playSound(all.getLocation(), Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1);
+            all.setGameMode(GameMode.SURVIVAL);
+        }
         getMembersMap().put(map, new ArrayList<>());
     }
 
@@ -326,9 +370,20 @@ public class MobEscapeAPI {
                 temp++;
             }
         }
+        Location firstPath = LocationParser.parseLocation(map.getPath().get(1));
+        NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.ENDER_DRAGON, "MobEscape" + map.getId());
+        npc.spawn(firstPath);
+
+        // 移動速度を設定
+        npc.getNavigator().getLocalParameters().speedModifier(map.getSpeed());
+        npc.addTrait(MoveAndAttackTrait.class);
+        npc.addTrait(MoveAndBreakTrait.class);
+
+        MobEscapeAPI.setMobMap(map, npc);
         BukkitTask task = new BukkitRunnable() {
             int time;
             int countdown = -1;
+            int taskLocationNum = 2;
             @Override
             public void run() {
                 if (getGamePhaseMap().get(map) == GamePhase.STOP) {
@@ -365,9 +420,22 @@ public class MobEscapeAPI {
                             }
                         }
                     } else {
-                        for (Player all : Bukkit.getOnlinePlayers()) {
-                            if (MobEscapeAPI.getMembers(map).contains(all)) {
-                                ActionBar.send(all, MainAPI.getMinuteTime(MobEscapeAPI.getGameTime(map)));
+                        if (taskLocationNum >= map.getPath().size()) {
+                            if (!MobEscapeAPI.getMob(map).getNavigator().isNavigating()) {
+                                setCountdownTaskMap(map, null);
+                                resetGame(map);
+                                cancel();
+                            }
+                        } else {
+                            if (!MobEscapeAPI.getMob(map).getNavigator().isNavigating()) {
+                                Location location = LocationParser.parseLocation(map.getPath().get(taskLocationNum));
+                                MobEscapeAPI.getMob(map).getNavigator().setTarget(location);
+                                taskLocationNum++;
+                            }
+                            for (Player all : Bukkit.getOnlinePlayers()) {
+                                if (MobEscapeAPI.getMembers(map).contains(all)) {
+                                    ActionBar.send(all, MainAPI.getMinuteTime(MobEscapeAPI.getGameTime(map)));
+                                }
                             }
                         }
                     }

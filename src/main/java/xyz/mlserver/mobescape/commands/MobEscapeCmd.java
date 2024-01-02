@@ -108,6 +108,21 @@ public class MobEscapeCmd implements CommandExecutor {
                     } else {
                         sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l最小プレイヤー数を入力してください。");
                     }
+                } else if (args[1].equalsIgnoreCase("speed")) {
+                    if (map == null) {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");
+                        return true;
+                    } else if (args.length > 2) {
+                        try {
+                            float speed = Float.parseFloat(args[2]);
+                            map.setSpeed(speed);
+                            sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lMob速度を「" + speed + "」に設定しました。");
+                        } catch (NumberFormatException e) {
+                            sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l数字を入力してください。");
+                        }
+                    } else {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l最小プレイヤー数を入力してください。");
+                    }
                 } else if (args[1].equalsIgnoreCase("under") || args[1].equalsIgnoreCase("undery")) {
                     if (map == null) {
                         sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");

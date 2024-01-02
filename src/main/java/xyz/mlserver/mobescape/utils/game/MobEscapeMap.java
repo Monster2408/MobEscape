@@ -34,6 +34,7 @@ public class MobEscapeMap {
     private Integer defaultArenaCountDownTime;
     private List<String> signLocList;
     private Double underY;
+    private Float speed;
 
     public MobEscapeMap(String name, int id) {
         this.name = name;
@@ -52,6 +53,17 @@ public class MobEscapeMap {
         this.defaultCountDownTime = 3;
         this.signLocList = new ArrayList<>();
         this.underY = 0.0;
+        this.speed = 1.0f;
+    }
+
+    public Float getSpeed() {
+        // デフォルトは1.0
+        if (speed == null) speed = 1.0f;
+        return speed;
+    }
+
+    public void setSpeed(Float speed) {
+        this.speed = speed;
     }
 
     public Double getUnderY() {
@@ -289,6 +301,7 @@ public class MobEscapeMap {
 
     public void death(Player player, DeathReason reason) {
         if (!MobEscapeAPI.getMembers(this).contains(player)) return;
+        if (player.getGameMode() == GameMode.SPECTATOR) return;
         player.setGameMode(GameMode.SPECTATOR);
         player.sendMessage("§cあなたは死亡しました。理由: " + reason.name());
         if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
@@ -300,6 +313,7 @@ public class MobEscapeMap {
         UNDER_Y(0, "範囲外に落ちた"),
         FALL(1, "奈落に落ちた"),
         MOB_DAMAGE(2, "モンスターに倒された"),
+        DEATH(3, "死亡した"),
         ;
 
         DeathReason(int id, String reason) {

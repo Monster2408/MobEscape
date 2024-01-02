@@ -16,7 +16,7 @@ public class MobEscapeTab implements TabCompleter {
     private static final List<String> FIRST_CMD_ARGS = Arrays.asList("gui", "join", "leave");
     private static final List<String> FIRST_CMD_ARGS_OP = Stream.of(Arrays.asList("create", "set", "add", "delete"), FIRST_CMD_ARGS).flatMap(Collection::stream).collect(Collectors.toList());
 
-    private static final List<String> SET_CMD_ARGS = Arrays.asList("lobby", "arena", "max", "min", "under", "undery", "icon", "pos", "pos1", "pos2", "goal");
+    private static final List<String> SET_CMD_ARGS = Arrays.asList("lobby", "arena", "max", "min", "speed", "under", "undery", "icon", "pos", "pos1", "pos2", "goal");
     private static final List<String> ADD_CMD_ARGS = Arrays.asList("spawn", "path");
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
