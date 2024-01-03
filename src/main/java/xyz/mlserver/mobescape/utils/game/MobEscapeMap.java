@@ -266,11 +266,22 @@ public class MobEscapeMap {
 
     public void join(Player player) {
         if (getArenaLobby() == null) return;
+        if (MobEscapeAPI.getGamePhaseMap().get(this) == GamePhase.WAITING) {
+            player.sendMessage("§cマップ準備中です。しばらくお待ちください。");
+            return;
+        }
         List<Player> list = MobEscapeAPI.getMembers(this);
         if (list.contains(player)) return;
         list.add(player);
         MobEscapeAPI.getMembersMap().put(this, list);
         player.teleport(getArenaLobby());
+        player.setFoodLevel(20);
+        if (MobEscapeAPI.getGamePhaseMap().get(this) == GamePhase.ARENA) {
+            player.setGameMode(GameMode.SURVIVAL);
+        } else {
+            player.setGameMode(GameMode.SPECTATOR);
+            player.sendMessage("§cゲーム中のため観戦モードに設定しました。");
+        }
         MobEscapeAPI.startArenaCountDown(this);
     }
 

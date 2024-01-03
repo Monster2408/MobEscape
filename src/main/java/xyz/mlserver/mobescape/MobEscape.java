@@ -9,6 +9,7 @@ import xyz.mlserver.mobescape.listeners.BukkitBlockClickListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerDamageByEntityListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerDamageEvent;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerDeathEvent;
+import xyz.mlserver.mobescape.listeners.BukkitPlayerFoodLevelChangeListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerJoinListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerMoveListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerQuitListener;
@@ -41,6 +42,7 @@ public final class MobEscape extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BukkitPlayerDamageByEntityListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerDamageEvent(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerDeathEvent(), this);
+        getServer().getPluginManager().registerEvents(new BukkitPlayerFoodLevelChangeListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerJoinListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerMoveListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerQuitListener(), this);
