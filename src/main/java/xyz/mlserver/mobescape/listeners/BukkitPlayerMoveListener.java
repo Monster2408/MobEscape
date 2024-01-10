@@ -26,7 +26,9 @@ public class BukkitPlayerMoveListener implements Listener {
                 if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) return;
                 if (map.getGoalPos1().getX() <= player.getLocation().getX() && player.getLocation().getX() <= map.getGoalPos2().getX()) {
                     if (map.getGoalPos1().getZ() <= player.getLocation().getZ() && player.getLocation().getZ() <= map.getGoalPos2().getZ()) {
-                        map.goal(player);
+                        if (map.getGoalPos1().getY() <= player.getLocation().getY() && player.getLocation().getY() <= map.getGoalPos2().getY()) {
+                            map.goal(player);
+                        }
                     }
                 } else if (map.getUnderY() >= player.getLocation().getY()) {
                     map.death(player, MobEscapeMap.DeathReason.UNDER_Y);

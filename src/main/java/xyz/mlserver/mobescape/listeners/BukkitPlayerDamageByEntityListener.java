@@ -21,6 +21,7 @@ public class BukkitPlayerDamageByEntityListener implements Listener {
             if (!MobEscapeAPI.getMembers(map).contains(victim)) continue;
             if (MobEscapeAPI.getMob(map).getEntity() != attackerEntity) continue;
             map.death(victim, MobEscapeMap.DeathReason.DEATH);
+            return;
         }
     }
 

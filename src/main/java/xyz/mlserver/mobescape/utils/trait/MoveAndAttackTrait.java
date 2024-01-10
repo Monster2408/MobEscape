@@ -30,6 +30,7 @@ public class MoveAndAttackTrait extends Trait implements Listener {
                     if (MobEscapeAPI.getMobMap().get(map).equals(npc)) {
                         if (MobEscapeAPI.getMembers(map).contains(player)) {
                             map.death(player, MobEscapeMap.DeathReason.MOB_DAMAGE);
+                            return;
                         }
                     }
                 }
