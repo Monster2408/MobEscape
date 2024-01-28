@@ -428,9 +428,12 @@ public class MobEscapeAPI {
                             }
                         } else {
                             if (!MobEscapeAPI.getMob(map).getNavigator().isNavigating()) {
-                                Location location = LocationParser.parseLocation(map.getPath().get(taskLocationNum));
-                                MobEscapeAPI.getMob(map).getNavigator().setTarget(location);
-                                taskLocationNum++;
+                                Location target = LocationParser.parseLocation(map.getPath().get(taskLocationNum));
+                                if (target.distance(MobEscapeAPI.getMob(map).getEntity().getLocation()) < 3) {
+                                    taskLocationNum++;
+                                    target = LocationParser.parseLocation(map.getPath().get(taskLocationNum));
+                                }
+                                MobEscapeAPI.getMob(map).getNavigator().setTarget(target.clone());
                             }
                             for (Player all : Bukkit.getOnlinePlayers()) {
                                 if (MobEscapeAPI.getMembers(map).contains(all)) {
