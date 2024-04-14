@@ -3,9 +3,7 @@ package xyz.mlserver.mobescape.commands;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.internal.annotation.Selection;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -15,10 +13,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import xyz.mlserver.java.Log;
-import xyz.mlserver.mobescape.MobEscape;
+import xyz.mlserver.mobescape.utils.WorldEditHook;
 import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 import xyz.mlserver.mobescape.utils.api.MsgAPI;
-import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
 import xyz.mlserver.mobescape.utils.game.MobEscapeGUI;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
@@ -32,14 +29,19 @@ public class MobEscapeCmd implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-        if (args.length == 0) {
-            player.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方が間違っています。");
-            player.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lコマンドの使い方: /mobescape <join|leave|start|stop|setspawn|setarena|setlobby");
-            return true;
-        }
+        String uuidStr = player.getUniqueId().toString();
 
-        if (args[0].equalsIgnoreCase("gui")) {
+        if (args.length == 0 || args[0].equalsIgnoreCase("gui") || args[0].equalsIgnoreCase("join")) {
             MobEscapeGUI.open(player);
+            return true;
+        } else if (args[0].equalsIgnoreCase("leave")) {
+            for (MobEscapeMap map : MobEscapeAPI.getMapHashMap().values()) {
+                if (MobEscapeAPI.getMembers(map).contains(player)) {
+                    map.leave(player);
+                    return true;
+                }
+            }
+            player.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lあなたはゲームに参加していません。");
             return true;
         }
 
@@ -105,6 +107,35 @@ public class MobEscapeCmd implements CommandExecutor {
                         }
                     } else {
                         sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l最小プレイヤー数を入力してください。");
+                    }
+                } else if (args[1].equalsIgnoreCase("speed")) {
+                    if (map == null) {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");
+                        return true;
+                    } else if (args.length > 2) {
+                        try {
+                            float speed = Float.parseFloat(args[2]);
+                            map.setSpeed(speed);
+                            sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lMob速度を「" + speed + "」に設定しました。");
+                        } catch (NumberFormatException e) {
+                            sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l数字を入力してください。");
+                        }
+                    } else {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l最小プレイヤー数を入力してください。");
+                    }
+                } else if (args[1].equalsIgnoreCase("under") || args[1].equalsIgnoreCase("undery")) {
+                    if (map == null) {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");
+                    } else if (args.length > 2) {
+                        try {
+                            double min = Double.parseDouble(args[2]);
+                            map.setUnderY(min);
+                            sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lY座標の制限を「" + String.format("%.1f", min) + "」に設定しました。");
+                        } catch (NumberFormatException e) {
+                            sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l数字を入力してください。");
+                        }
+                    } else {
+                        sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l最大プレイヤー数を入力してください。");
                     }
                 } else if (args[1].equalsIgnoreCase("icon")) {
                     if (map == null) {
@@ -279,7 +310,8 @@ public class MobEscapeCmd implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("save")) {
             if (args.length > 1) {
                 if (args[1].equalsIgnoreCase("confirm")) {
-                    MobEscapeAPI.saveMap();
+                    if (map == null) MobEscapeAPI.saveMap();
+                    else MobEscapeAPI.saveMap(map);
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップを保存しました。");
                 }
             } else {
@@ -288,6 +320,13 @@ public class MobEscapeCmd implements CommandExecutor {
             return true;
         } else if (args[0].equalsIgnoreCase("edit")) {
             MobEscapeGUI.openEdit(map, player);
+        } else if (args[0].equalsIgnoreCase("load")) {
+            if (map == null) {
+                sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§l編集中のマップがありません。");
+            } else {
+                if (WorldEditHook.loadSchematic(map.getId(), map.getPos1())) sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップをロードしました。");
+                else sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップのロードに失敗しました。");
+            }
         }
         return false;
     }

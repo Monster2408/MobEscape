@@ -10,7 +10,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MobEscapeGUI {

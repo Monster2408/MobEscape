@@ -1,8 +1,6 @@
 package xyz.mlserver.mobescape.listeners;
 
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -15,6 +13,21 @@ import xyz.mlserver.mobescape.utils.game.MobEscapeGUI;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
 public class MEGUIClickListener implements Listener {
+
+    @EventHandler
+    public void onMiniGameGUI(InventoryClickEvent e) {
+        if (e.getCurrentItem() == null) return;
+        if (e.getCurrentItem().getItemMeta() == null) return;
+        if (e.getClickedInventory() == null) return;
+        if (e.getWhoClicked() == null) return;
+        if (!e.getClickedInventory().getName().equalsIgnoreCase("§a§lMiniGame")) return;
+        if (e.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase(MobEscapeGUI.getTitle())) {
+            e.setCancelled(true);
+            Player player = (Player) e.getWhoClicked();
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+            MobEscapeGUI.open(player);
+        }
+    }
 
     /**
      * メインGUIのクリックイベント
@@ -63,7 +76,6 @@ public class MEGUIClickListener implements Listener {
                     message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mobescape set arena"));
                     player.spigot().sendMessage(message);
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    return;
                 } else if (MobEscapeGUI.isPosItem(e.getCurrentItem())) {
                     TextComponent message = new TextComponent(ChatColor.GOLD + "クリックでPos1を設定する。");
                     message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mobescape set pos1"));
@@ -75,42 +87,35 @@ public class MEGUIClickListener implements Listener {
                     message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mobescape set pos"));
                     player.spigot().sendMessage(message);
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    return;
                 } else if (MobEscapeGUI.isGoalItem(e.getCurrentItem())) {
                     TextComponent message = new TextComponent(ChatColor.GOLD + "クリックでGoalPosを設定する。(WE使用)");
                     message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mobescape set goal"));
                     player.spigot().sendMessage(message);
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    return;
                 } else if (MobEscapeGUI.isNameItem(e.getCurrentItem())) {
                     TextComponent message = new TextComponent(ChatColor.GOLD + "クリックで名前を変更するコマンドをサジェストする。");
                     message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/mobescape set name "));
                     player.spigot().sendMessage(message);
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    return;
                 } else if (MobEscapeGUI.isIconItem(e.getCurrentItem())) {
                     TextComponent message = new TextComponent(ChatColor.GOLD + "クリックでアイコンを変更するコマンドをサジェストする。(手にアイテムを持ちながら実行)");
                     message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/mobescape set icon"));
                     player.spigot().sendMessage(message);
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    return;
                 } else if (e.getCurrentItem().isSimilar(MobEscapeGUI.getLoadItem())) {
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                     MobEscapeAPI.loadMap(map);
                     MobEscapeGUI.openEdit(map, player);
                     player.sendMessage(ChatColor.GREEN + "マップをロードしました。");
-                    return;
                 } else if (e.getCurrentItem().isSimilar(MobEscapeGUI.getSaveItem())) {
                     player.closeInventory();
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                     MobEscapeAPI.saveMap(map);
                     player.sendMessage(ChatColor.GREEN + "マップを保存しました。");
-                    return;
                 } else if (e.getCurrentItem().isSimilar(MobEscapeGUI.getClose())) {
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                     MobEscapeAPI.setEditingMap(player, null);
                     MobEscapeGUI.openEdit(null, player);
-                    return;
                 }
             } else {
                 if (e.getCurrentItem().isSimilar(MobEscapeGUI.getEditMapItem(map))) {

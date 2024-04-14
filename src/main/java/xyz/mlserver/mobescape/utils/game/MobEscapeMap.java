@@ -1,8 +1,14 @@
 package xyz.mlserver.mobescape.utils.game;
 
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import xyz.mlserver.java.Log;
+import xyz.mlserver.mobescape.utils.WorldEditHook;
+import xyz.mlserver.mobescape.utils.api.MainAPI;
+import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
 
 import java.util.ArrayList;
@@ -18,18 +24,17 @@ public class MobEscapeMap {
     private List<String> spawns;
     private String arenaLobby;
     private String material;
-    private List<String> members;
     private HashMap<Integer, String> path;
 
     private String pos1;
     private String pos2;
     private String goalPos1;
     private String goalPos2;
-    private Integer countDownTime;
     private Integer defaultCountDownTime;
-    private Integer arenaCountDownTime;
     private Integer defaultArenaCountDownTime;
-    private Double gameTime;
+    private List<String> signLocList;
+    private Double underY;
+    private Float speed;
 
     public MobEscapeMap(String name, int id) {
         this.name = name;
@@ -39,57 +44,54 @@ public class MobEscapeMap {
         this.spawns = new ArrayList<>();
         this.arenaLobby = null;
         this.material = null;
-        this.members = new ArrayList<>();
         this.pos1 = null;
         this.pos2 = null;
         this.path = new HashMap<>();
         this.goalPos1 = null;
         this.goalPos2 = null;
         this.defaultArenaCountDownTime = 30;
-        this.arenaCountDownTime = -1;
         this.defaultCountDownTime = 3;
-        this.countDownTime = -1;
-        this.gameTime = 0.0;
+        this.signLocList = new ArrayList<>();
+        this.underY = 0.0;
+        this.speed = 1.0f;
     }
 
-    public Double getGameTime() {
-        return gameTime;
+    public Float getSpeed() {
+        // デフォルトは1.0
+        if (speed == null) speed = 1.0f;
+        return speed;
     }
 
-    public void setGameTime(Double gameTime) {
-        this.gameTime = gameTime;
+    public void setSpeed(Float speed) {
+        this.speed = speed;
+    }
+
+    public Double getUnderY() {
+        if (underY == null) underY = 0.0;
+        return underY;
+    }
+
+    public void setUnderY(Double underY) {
+        this.underY = underY;
+    }
+
+    public void setSignLocList(List<String> signLocList) {
+        this.signLocList = signLocList;
+    }
+
+    public List<String> getSignLocList() {
+        if (signLocList == null) signLocList = new ArrayList<>();
+        return signLocList;
     }
 
     public Integer getDefaultArenaCountDownTime() {
+        if (defaultArenaCountDownTime == null) defaultArenaCountDownTime = 30;
         return defaultArenaCountDownTime;
     }
 
-    public void setDefaultArenaCountDownTime(Integer defaultArenaCountDownTime) {
-        this.defaultArenaCountDownTime = defaultArenaCountDownTime;
-    }
-
-    public Integer getArenaCountDownTime() {
-        return arenaCountDownTime;
-    }
-
-    public void setArenaCountDownTime(Integer arenaCountDownTime) {
-        this.arenaCountDownTime = arenaCountDownTime;
-    }
-
     public Integer getDefaultCountDownTime() {
+        if (defaultCountDownTime == null) defaultCountDownTime = 3;
         return defaultCountDownTime;
-    }
-
-    public void setDefaultCountDownTime(Integer defaultCountDownTime) {
-        this.defaultCountDownTime = defaultCountDownTime;
-    }
-
-    public Integer getCountDownTime() {
-        return countDownTime;
-    }
-
-    public void setCountDownTime(Integer countDownTime) {
-        this.countDownTime = countDownTime;
     }
 
     public Location getGoalPos1() {
@@ -226,24 +228,120 @@ public class MobEscapeMap {
         return Material.getMaterial(material);
     }
 
-    public void addMember(Player player) {
-        String uuid = player.getUniqueId().toString();
-        if (!getMembers().contains(uuid)) getMembers().add(uuid);
+    public boolean isCompleted() {
+        if (getPos1() == null) return false;
+        if (getPos2() == null) return false;
+        if (getGoalPos1() == null) return false;
+        if (getGoalPos2() == null) return false;
+        if (getArenaLobby() == null) return false;
+        if (getSpawns() == null || getSpawns().isEmpty()) return false;
+        if (getPath().isEmpty()) return false;
+        if (MobEscapeAPI.getLobby() == null) return false;
+        return WorldEditHook.getSchematicFile(this).exists();
     }
 
-    public void removeMember(Player player) {
-        getMembers().remove(player.getUniqueId().toString());
-    }
-
-    public List<String> getMembers() {
-        if (members == null) members = new ArrayList<>();
-        return members;
+    public boolean isEnd() {
+        if (MobEscapeAPI.getMembers(this).isEmpty()) {
+            if (MainAPI.isDebug()) Log.debug("Arena " + getName() + " is end because no players are in the arena.");
+            return true;
+        }
+        if (MobEscapeAPI.getMembers(this).size() <= MobEscapeAPI.getGoalPlayers(this).size()) {
+            if (MainAPI.isDebug())
+                Log.debug("Arena " + getName() + " is end because the number of players is less than or equal to the number of goal players.");
+            return true;
+        }
+        int spectate = 0;
+        for (Player all : Bukkit.getOnlinePlayers()) {
+            if (MobEscapeAPI.getMembers(this).contains(all)) {
+                if (all.getGameMode() == GameMode.SPECTATOR) spectate++;
+            }
+        }
+        if (spectate >= MobEscapeAPI.getMembers(this).size()) {
+            if (MainAPI.isDebug())
+                Log.debug("Arena " + getName() + " is end because the number of spectators is greater than or equal to the number of players.");
+            return true;
+        }
+        return false;
     }
 
     public void join(Player player) {
         if (getArenaLobby() == null) return;
-        addMember(player);
+        if (MobEscapeAPI.getGamePhaseMap().get(this) == GamePhase.WAITING) {
+            player.sendMessage("§cマップ準備中です。しばらくお待ちください。");
+            return;
+        }
+        List<Player> list = MobEscapeAPI.getMembers(this);
+        if (list.contains(player)) return;
+        list.add(player);
+        MobEscapeAPI.getMembersMap().put(this, list);
         player.teleport(getArenaLobby());
+        player.setFoodLevel(20);
+        if (MobEscapeAPI.getGamePhaseMap().get(this) == GamePhase.ARENA) {
+            player.setGameMode(GameMode.SURVIVAL);
+        } else {
+            player.setGameMode(GameMode.SPECTATOR);
+            player.sendMessage("§cゲーム中のため観戦モードに設定しました。");
+        }
+        MobEscapeAPI.startArenaCountDown(this);
+    }
+
+    public void leave(Player player) {
+        if (MobEscapeAPI.getLobby() == null) return;
+        List<Player> list = MobEscapeAPI.getMembers(this);
+        if (!list.contains(player)) return;
+        list.remove(player);
+        MobEscapeAPI.getMembersMap().put(this, list);
+        player.teleport(MobEscapeAPI.getLobby().clone());
+        if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
+            MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.STOP);
+        }
+    }
+
+    public void goal(Player player) {
+        if (!MobEscapeAPI.getMembers(this).contains(player)) return;
+        List<Player> list = MobEscapeAPI.getGoalPlayers(this);
+        if (list.contains(player)) return;
+        list.add(player);
+        MobEscapeAPI.getGoalPlayersMap().put(this, list);
+        player.setGameMode(GameMode.SPECTATOR);
+        player.sendMessage("§aおめでとうございます！あなたはゴールしました！");
+        if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
+            MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.END);
+        }
+    }
+
+    public void death(Player player, DeathReason reason) {
+        if (!MobEscapeAPI.getMembers(this).contains(player)) return;
+        if (player.getGameMode() == GameMode.SPECTATOR) return;
+        player.setGameMode(GameMode.SPECTATOR);
+        player.sendMessage("§cあなたは死亡しました。理由: " + reason.name());
+        if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
+            MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.END);
+        }
+    }
+
+    public enum DeathReason {
+        UNDER_Y(0, "範囲外に落ちた"),
+        FALL(1, "奈落に落ちた"),
+        MOB_DAMAGE(2, "モンスターに倒された"),
+        DEATH(3, "死亡した"),
+        ;
+
+        DeathReason(int id, String reason) {
+            this.id = id;
+            this.reason = reason;
+        }
+
+        private final int id;
+        public int getId() {
+            return id;
+        }
+
+        private final String reason;
+
+        public String getReason() {
+            return reason;
+        }
     }
 
 }
