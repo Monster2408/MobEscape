@@ -20,6 +20,9 @@ import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 import xyz.mlserver.mobescape.utils.trait.MoveAndAttackTrait;
 import xyz.mlserver.mobescape.utils.trait.MoveAndBreakTrait;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class MobEscape extends JavaPlugin {
 
     public static CustomConfiguration config;
@@ -59,6 +62,7 @@ public final class MobEscape extends JavaPlugin {
 
         MobEscapeAPI.loadMap();
         MainAPI.setDebug(config.getConfig().getBoolean("debug", false));
+        MobEscapeAPI.setWinCommandList();
     }
 
     @Override

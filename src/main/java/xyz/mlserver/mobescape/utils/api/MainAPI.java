@@ -1,5 +1,8 @@
 package xyz.mlserver.mobescape.utils.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainAPI {
 
     static String getMinuteTime(int i) {

@@ -455,4 +455,17 @@ public class MobEscapeAPI {
         if (gamePhaseMap == null) gamePhaseMap = new HashMap<>();
         return gamePhaseMap;
     }
+
+    private static List<String> winCommandList;
+
+    public static void setWinCommandList() {
+        List<String> winCommandList = MobEscape.config.getConfig().getStringList("win-command-list");
+        if (winCommandList == null) winCommandList = new ArrayList<>();
+        MobEscapeAPI.winCommandList = winCommandList;
+    }
+
+    public static List<String> getWinCommandList() {
+        if (winCommandList == null) winCommandList = new ArrayList<>();
+        return winCommandList;
+    }
 }

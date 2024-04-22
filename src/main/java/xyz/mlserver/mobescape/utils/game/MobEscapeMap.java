@@ -305,6 +305,11 @@ public class MobEscapeMap {
         MobEscapeAPI.getGoalPlayersMap().put(this, list);
         player.setGameMode(GameMode.SPECTATOR);
         player.sendMessage("§aおめでとうございます！あなたはゴールしました！");
+        if (!MobEscapeAPI.getWinCommandList().isEmpty()) {
+            for (String command : MobEscapeAPI.getWinCommandList()) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
+            }
+        }
         if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
             MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.END);
         }

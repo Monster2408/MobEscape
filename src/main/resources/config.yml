@@ -1,0 +1,2 @@
+win-command-list:
+    - "bp add %player% 1000"
