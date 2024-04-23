@@ -257,15 +257,15 @@ public class MobEscapeAPI {
     }
 
     public static String getJoinSignText(int line) {
-        if (line == 0) return ChatColor.BLACK + "[" + ChatColor.GREEN + "Join " + ChatColor.RED + "MobEscape" + ChatColor.BLACK + "]";
-        if (line == 1) return ChatColor.BLACK + "ID: " + ChatColor.RED + "%id%";
-        if (line == 2) return ChatColor.BLACK + "上限: " + ChatColor.RED + "%max% " + ChatColor.BLACK + "下限: " + ChatColor.RED + "%min%";
-        if (line == 3) return ChatColor.BLACK + "参加中: " + ChatColor.RED + "%count%";
+        if (line == 0) return "[" + ChatColor.GREEN + "Join " + ChatColor.RED + "MobEscape" + ChatColor.BLACK + "]";
+        if (line == 1) return "ID: " + ChatColor.RED + "%id%";
+        if (line == 2) return "上限: " + ChatColor.RED + "%max% " + ChatColor.BLACK + "下限: " + ChatColor.RED + "%min%";
+        if (line == 3) return "参加中: " + ChatColor.RED + "%count%";
         return null;
     }
 
     public static String getLeaveSignText(int line) {
-        if (line == 0) return ChatColor.BLACK + "[" + ChatColor.GREEN + "Leave " + ChatColor.RED + "MobEscape" + ChatColor.BLACK + "]";
+        if (line == 0) return "[" + ChatColor.GREEN + "Leave " + ChatColor.RED + "MobEscape" + ChatColor.BLACK + "]";
         if (line == 1 || line == 2 || line == 3) return "";
         return null;
     }
