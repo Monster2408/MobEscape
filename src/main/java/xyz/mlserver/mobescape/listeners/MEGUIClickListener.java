@@ -2,6 +2,7 @@ package xyz.mlserver.mobescape.listeners;
 
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -110,8 +111,7 @@ public class MEGUIClickListener implements Listener {
                 } else if (e.getCurrentItem().isSimilar(MobEscapeGUI.getSaveItem())) {
                     player.closeInventory();
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-                    MobEscapeAPI.saveMap(map);
-                    player.sendMessage(ChatColor.GREEN + "マップを保存しました。");
+                    Bukkit.getServer().dispatchCommand(player, "mobescape save");
                 } else if (e.getCurrentItem().isSimilar(MobEscapeGUI.getClose())) {
                     player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
                     MobEscapeAPI.setEditingMap(player, null);

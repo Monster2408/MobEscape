@@ -6,6 +6,7 @@ import xyz.mlserver.mc.util.CustomConfiguration;
 import xyz.mlserver.mobescape.commands.MobEscapeCmd;
 import xyz.mlserver.mobescape.commands.MobEscapeTab;
 import xyz.mlserver.mobescape.listeners.BukkitBlockClickListener;
+import xyz.mlserver.mobescape.listeners.BukkitItemDropListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerDamageByEntityListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerDamageEvent;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerDeathEvent;
@@ -13,6 +14,7 @@ import xyz.mlserver.mobescape.listeners.BukkitPlayerFoodLevelChangeListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerJoinListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerMoveListener;
 import xyz.mlserver.mobescape.listeners.BukkitPlayerQuitListener;
+import xyz.mlserver.mobescape.listeners.BukkitRightClickListener;
 import xyz.mlserver.mobescape.listeners.BukkitSignChangeListener;
 import xyz.mlserver.mobescape.listeners.MEGUIClickListener;
 import xyz.mlserver.mobescape.utils.api.MainAPI;
@@ -42,6 +44,7 @@ public final class MobEscape extends JavaPlugin {
         dataYml.saveDefaultConfig();
 
         getServer().getPluginManager().registerEvents(new BukkitBlockClickListener(), this);
+        getServer().getPluginManager().registerEvents(new BukkitItemDropListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerDamageByEntityListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerDamageEvent(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerDeathEvent(), this);
@@ -49,7 +52,9 @@ public final class MobEscape extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BukkitPlayerJoinListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerMoveListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerQuitListener(), this);
+        getServer().getPluginManager().registerEvents(new BukkitRightClickListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitSignChangeListener(), this);
+
         getServer().getPluginManager().registerEvents(new MEGUIClickListener(), this);
 
         getCommand("mobescape").setExecutor(new MobEscapeCmd());

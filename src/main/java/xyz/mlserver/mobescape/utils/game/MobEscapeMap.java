@@ -276,8 +276,11 @@ public class MobEscapeMap {
         MobEscapeAPI.getMembersMap().put(this, list);
         player.teleport(getArenaLobby());
         player.setFoodLevel(20);
-        if (MobEscapeAPI.getGamePhaseMap().get(this) == GamePhase.ARENA) {
+        if (!MobEscapeAPI.getGamePhaseMap().containsKey(this) || MobEscapeAPI.getGamePhaseMap().get(this) == GamePhase.ARENA) {
             player.setGameMode(GameMode.SURVIVAL);
+            player.getInventory().clear();
+            player.getInventory().setItem(0, MobEscapeAPI.getLeaveItem());
+            player.getInventory().setItem(8, MobEscapeAPI.getStartVoteItem());
         } else {
             player.setGameMode(GameMode.SPECTATOR);
             player.sendMessage("§cゲーム中のため観戦モードに設定しました。");

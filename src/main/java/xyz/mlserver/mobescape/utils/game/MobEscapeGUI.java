@@ -204,7 +204,7 @@ public class MobEscapeGUI {
     }
 
     public static ItemStack getSaveItem() {
-        ItemStack item = new ItemStack(Material.WRITTEN_BOOK);
+        ItemStack item = new ItemStack(Material.BOOK_AND_QUILL);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName("§aマップ保存");
         List<String> lore = new ArrayList<>();

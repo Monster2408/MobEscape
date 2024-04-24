@@ -2,21 +2,17 @@ package xyz.mlserver.mobescape.utils.api;
 
 import com.google.gson.Gson;
 import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.ai.Navigator;
-import net.citizensnpcs.api.ai.NavigatorParameters;
-import net.citizensnpcs.api.trait.Trait;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import xyz.mlserver.java.Log;
@@ -37,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class MobEscapeAPI {
 
@@ -306,6 +303,7 @@ public class MobEscapeAPI {
         WorldEditHook.loadSchematic(map.getId(), map.getPos1());
         getGamePhaseMap().put(map, GamePhase.ARENA);
         getGoalPlayersMap().put(map, new ArrayList<>());
+        MobEscapeAPI.getMapStartVote().put(map, new ArrayList<>());
         for (Player all : getMembersMap().get(map)) {
             all.teleport(MobEscapeAPI.getLobby());
             all.playSound(all.getLocation(), Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1);
@@ -337,14 +335,21 @@ public class MobEscapeAPI {
                         setCountdownTaskMap(map, null);
                         resetGame(map);
                         cancel();
+                    } else if (MobEscapeAPI.getMembers(map).isEmpty()) {
+                        setCountdownTaskMap(map, null);
+                        resetGame(map);
+                        cancel();
                     } else {
                         int time = MobEscapeAPI.getArenaCountDownTime(map);
-                        for (Player all : Bukkit.getOnlinePlayers()) {
-                            if (MobEscapeAPI.getMembers(map).contains(all)) {
-                                String colorTemp = ChatColor.GREEN + "" + ChatColor.BOLD;
-                                if (time % 2 == 0) colorTemp = ChatColor.RED + "" + ChatColor.BOLD;
-                                ActionBar.send(all, colorTemp + "[待機中]ゲーム開始まで" + time + "秒");
-                            }
+                        MobEscapeAPI.getMapStartVote().putIfAbsent(map, new ArrayList<>());
+                        int vote = MobEscapeAPI.getMapStartVote().get(map).size();
+                        int members = MobEscapeAPI.getMembers(map).size();
+                        int start_count = (members / 2) + (members % 2);
+                        if (vote >= start_count && time > 5) time = 5;
+                        for (Player all : MobEscapeAPI.getMembers(map)) {
+                            String colorTemp = ChatColor.GREEN + "" + ChatColor.BOLD;
+                            if (time % 2 == 0) colorTemp = ChatColor.RED + "" + ChatColor.BOLD;
+                            ActionBar.send(all, colorTemp + "[待機中]ゲーム開始まで" + time + "秒");
                         }
                         MobEscapeAPI.getArenaCountDownTimeMap().put(map, time - 1);
                     }
@@ -367,6 +372,8 @@ public class MobEscapeAPI {
             if (MobEscapeAPI.getMembers(map).contains(all)) {
                 if (map.getSpawns().size() <= temp) temp = 0;
                 all.teleport(map.getSpawns().get(temp).clone());
+                all.getInventory().clear();
+                all.getInventory().setItem(0, MobEscapeAPI.getLeaveItem());
                 temp++;
             }
         }
@@ -468,4 +475,36 @@ public class MobEscapeAPI {
         if (winCommandList == null) winCommandList = new ArrayList<>();
         return winCommandList;
     }
+
+    private static ItemStack leaveItem;
+
+    public static ItemStack getLeaveItem() {
+        if (leaveItem == null) {
+            leaveItem = new ItemStack(Material.REDSTONE);
+            ItemMeta meta = leaveItem.getItemMeta();
+            meta.setDisplayName("§c§lLeave");
+            leaveItem.setItemMeta(meta);
+        }
+        return leaveItem;
+    }
+
+    private static ItemStack startVoteItem;
+
+    public static ItemStack getStartVoteItem() {
+        if (startVoteItem == null) {
+            startVoteItem = new ItemStack(Material.EMERALD);
+            ItemMeta meta = startVoteItem.getItemMeta();
+            meta.setDisplayName("§a§lStart");
+            startVoteItem.setItemMeta(meta);
+        }
+        return startVoteItem;
+    }
+
+    private static HashMap<MobEscapeMap, List<UUID>> mapStartVote;
+
+    public static HashMap<MobEscapeMap, List<UUID>> getMapStartVote() {
+        if (mapStartVote == null) mapStartVote = new HashMap<>();
+        return mapStartVote;
+    }
+
 }

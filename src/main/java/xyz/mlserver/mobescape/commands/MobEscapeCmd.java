@@ -4,6 +4,8 @@ import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.regions.Region;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -315,7 +317,9 @@ public class MobEscapeCmd implements CommandExecutor {
                     sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップを保存しました。");
                 }
             } else {
-                sender.sendMessage("§c§l[§4§lMobEscape§c§l] §f§lマップを保存するには、/mobescape save confirm を実行してください。");
+                TextComponent message = new TextComponent("§c§l[§4§lMobEscape§c§l] §f§lマップを保存するには、/mobescape save confirm を実行してください。");
+                message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mobescape save confirm"));
+                sender.spigot().sendMessage(message);
             }
             return true;
         } else if (args[0].equalsIgnoreCase("edit")) {
