@@ -4,6 +4,7 @@ main: xyz.mlserver.mobescape.MobEscape
 depend:
     - WorldEdit
     - Citizens
+    - PlaceholderAPI
 
 commands:
     mobescape:

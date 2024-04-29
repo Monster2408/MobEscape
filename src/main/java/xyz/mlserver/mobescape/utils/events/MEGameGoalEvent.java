@@ -1,19 +1,21 @@
-package xyz.mlserver.mobescape.utils.event;
+package xyz.mlserver.mobescape.utils.events;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
-public class MEGameEndEvent extends Event {
+public class MEGameGoalEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
     private final Player player;
     private final MobEscapeMap map;
+    private final Double time;
 
-    public MEGameEndEvent(Player player, MobEscapeMap map) {
-        this.player = player;
+    public MEGameGoalEvent(MobEscapeMap map, Player player, Double time) {
         this.map = map;
+        this.player = player;
+        this.time = time;
     }
 
     public Player getPlayer() {
@@ -22,6 +24,10 @@ public class MEGameEndEvent extends Event {
 
     public MobEscapeMap getMap() {
         return map;
+    }
+
+    public Double getTime() {
+        return time;
     }
 
     @Override

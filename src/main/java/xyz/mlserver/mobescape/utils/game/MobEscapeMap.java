@@ -10,6 +10,10 @@ import xyz.mlserver.mobescape.utils.WorldEditHook;
 import xyz.mlserver.mobescape.utils.api.MainAPI;
 import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
+import xyz.mlserver.mobescape.utils.events.MEGameDeathEvent;
+import xyz.mlserver.mobescape.utils.events.MEGameGoalEvent;
+import xyz.mlserver.mobescape.utils.events.MEGameJoinEvent;
+import xyz.mlserver.mobescape.utils.events.MEGameLeaveEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -276,6 +280,7 @@ public class MobEscapeMap {
         MobEscapeAPI.getMembersMap().put(this, list);
         player.teleport(getArenaLobby());
         player.setFoodLevel(20);
+        Bukkit.getServer().getPluginManager().callEvent(new MEGameJoinEvent(this, player));
         if (!MobEscapeAPI.getGamePhaseMap().containsKey(this) || MobEscapeAPI.getGamePhaseMap().get(this) == GamePhase.ARENA) {
             player.setGameMode(GameMode.SURVIVAL);
             player.getInventory().clear();
@@ -295,6 +300,7 @@ public class MobEscapeMap {
         list.remove(player);
         MobEscapeAPI.getMembersMap().put(this, list);
         player.teleport(MobEscapeAPI.getLobby().clone());
+        Bukkit.getServer().getPluginManager().callEvent(new MEGameLeaveEvent(this, player));
         if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
             MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.STOP);
         }
@@ -308,6 +314,7 @@ public class MobEscapeMap {
         MobEscapeAPI.getGoalPlayersMap().put(this, list);
         player.setGameMode(GameMode.SPECTATOR);
         player.sendMessage("§aおめでとうございます！あなたはゴールしました！");
+        Bukkit.getServer().getPluginManager().callEvent(new MEGameGoalEvent(this, player, MobEscapeAPI.getGameTimeMap().get(this)));
         if (!MobEscapeAPI.getWinCommandList().isEmpty()) {
             for (String command : MobEscapeAPI.getWinCommandList()) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
@@ -323,6 +330,7 @@ public class MobEscapeMap {
         if (player.getGameMode() == GameMode.SPECTATOR) return;
         player.setGameMode(GameMode.SPECTATOR);
         player.sendMessage("§cあなたは死亡しました。理由: " + reason.name());
+        Bukkit.getServer().getPluginManager().callEvent(new MEGameDeathEvent(this, player, reason));
         if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
             MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.END);
         }

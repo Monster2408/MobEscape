@@ -1,7 +1,9 @@
 package xyz.mlserver.mobescape;
 
 import net.citizensnpcs.api.CitizensAPI;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import xyz.mlserver.java.Log;
 import xyz.mlserver.mc.util.CustomConfiguration;
 import xyz.mlserver.mobescape.commands.MobEscapeCmd;
 import xyz.mlserver.mobescape.commands.MobEscapeTab;
@@ -32,6 +34,7 @@ public final class MobEscape extends JavaPlugin {
     public static CustomConfiguration dataYml;
 
     private static JavaPlugin plugin;
+    private boolean placeholderapi = false;
 
     @Override
     public void onEnable() {
@@ -65,6 +68,13 @@ public final class MobEscape extends JavaPlugin {
 
         plugin = this;
 
+        Plugin PlaceholderAPI = getServer().getPluginManager().getPlugin("PlaceholderAPI");
+        if (PlaceholderAPI != null && PlaceholderAPI.isEnabled()) {
+            placeholderapi = true;
+            Log.info("Successfully linked with PlaceholderAPI, version " + PlaceholderAPI.getDescription().getVersion());
+            new MobEscapePlaceholders(this).register();
+        }
+
         MobEscapeAPI.loadMap();
         MainAPI.setDebug(config.getConfig().getBoolean("debug", false));
         MobEscapeAPI.setWinCommandList();
@@ -78,5 +88,9 @@ public final class MobEscape extends JavaPlugin {
 
     public static JavaPlugin getPlugin() {
         return plugin;
+    }
+
+    public boolean isPlaceholderAPI() {
+        return placeholderapi;
     }
 }

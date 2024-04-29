@@ -20,6 +20,9 @@ import xyz.mlserver.mobescape.MobEscape;
 import xyz.mlserver.mobescape.utils.WorldEditHook;
 import xyz.mlserver.mobescape.utils.bukkit.ActionBar;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
+import xyz.mlserver.mobescape.utils.events.MEGameEndEvent;
+import xyz.mlserver.mobescape.utils.events.MEGameGoalEvent;
+import xyz.mlserver.mobescape.utils.events.MEGameStartEvent;
 import xyz.mlserver.mobescape.utils.game.GamePhase;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
@@ -309,7 +312,9 @@ public class MobEscapeAPI {
             all.playSound(all.getLocation(), Sound.ENTITY_ENDERMEN_TELEPORT, 1, 1);
             all.setGameMode(GameMode.SURVIVAL);
         }
+        getGameTimeMap().remove(map);
         getMembersMap().put(map, new ArrayList<>());
+        Bukkit.getServer().getPluginManager().callEvent(new MEGameEndEvent(map));
     }
 
     /**
@@ -391,6 +396,7 @@ public class MobEscapeAPI {
             int time;
             int countdown = -1;
             int taskLocationNum = 2;
+            double gameTime = 0.0;
             @Override
             public void run() {
                 if (getGamePhaseMap().get(map) == GamePhase.STOP) {
@@ -420,6 +426,7 @@ public class MobEscapeAPI {
                         }
                     } else if (getGamePhaseMap().get(map) == GamePhase.READY) {
                         getGamePhaseMap().put(map, GamePhase.GAME);
+                        Bukkit.getServer().getPluginManager().callEvent(new MEGameStartEvent(map));
                         for (Player all : Bukkit.getOnlinePlayers()) {
                             if (MobEscapeAPI.getMembers(map).contains(all)) {
                                 ActionBar.send(all, MainAPI.getMinuteTime(MobEscapeAPI.getGameTime(map)));
@@ -449,7 +456,8 @@ public class MobEscapeAPI {
                             }
                         }
                     }
-                    MobEscapeAPI.getGameTimeMap().put(map, MobEscapeAPI.getGameTime(map) + 0.1);
+                    gameTime = (Math.floor((MobEscapeAPI.getGameTime(map) + 0.1) * 10)) / 10;
+                    MobEscapeAPI.getGameTimeMap().put(map, gameTime);
                 }
             }
         }.runTaskTimer(MobEscape.getPlugin(), 0, 2);
