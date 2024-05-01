@@ -19,6 +19,7 @@ import xyz.mlserver.mobescape.listeners.BukkitPlayerQuitListener;
 import xyz.mlserver.mobescape.listeners.BukkitRightClickListener;
 import xyz.mlserver.mobescape.listeners.BukkitSignChangeListener;
 import xyz.mlserver.mobescape.listeners.MEGUIClickListener;
+import xyz.mlserver.mobescape.utils.MobEscapeDB;
 import xyz.mlserver.mobescape.utils.api.MainAPI;
 import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
 import xyz.mlserver.mobescape.utils.trait.MoveAndAttackTrait;
@@ -46,6 +47,16 @@ public final class MobEscape extends JavaPlugin {
         dataYml = new CustomConfiguration(this, "data.yml");
         dataYml.saveDefaultConfig();
 
+        Plugin PlaceholderAPI = getServer().getPluginManager().getPlugin("PlaceholderAPI");
+        if (PlaceholderAPI != null && PlaceholderAPI.isEnabled()) {
+            placeholderapi = true;
+            Log.info("Successfully linked with PlaceholderAPI, version " + PlaceholderAPI.getDescription().getVersion());
+            new MobEscapePlaceholders(this).register();
+        }
+
+        CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(MoveAndAttackTrait.class).withName("moveandattack"));
+        CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(MoveAndBreakTrait.class).withName("moveandbreak"));
+
         getServer().getPluginManager().registerEvents(new BukkitBlockClickListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitItemDropListener(), this);
         getServer().getPluginManager().registerEvents(new BukkitPlayerDamageByEntityListener(), this);
@@ -63,21 +74,13 @@ public final class MobEscape extends JavaPlugin {
         getCommand("mobescape").setExecutor(new MobEscapeCmd());
         getCommand("mobescape").setTabCompleter(new MobEscapeTab());
 
-        CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(MoveAndAttackTrait.class).withName("moveandattack"));
-        CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(MoveAndBreakTrait.class).withName("moveandbreak"));
-
         plugin = this;
-
-        Plugin PlaceholderAPI = getServer().getPluginManager().getPlugin("PlaceholderAPI");
-        if (PlaceholderAPI != null && PlaceholderAPI.isEnabled()) {
-            placeholderapi = true;
-            Log.info("Successfully linked with PlaceholderAPI, version " + PlaceholderAPI.getDescription().getVersion());
-            new MobEscapePlaceholders(this).register();
-        }
 
         MobEscapeAPI.loadMap();
         MainAPI.setDebug(config.getConfig().getBoolean("debug", false));
         MobEscapeAPI.setWinCommandList();
+
+        MobEscapeDB.load();
     }
 
     @Override

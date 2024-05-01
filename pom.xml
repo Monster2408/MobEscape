@@ -6,7 +6,7 @@
 
     <groupId>xyz.mlserver</groupId>
     <artifactId>MobEscape</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
 
     <name>MobEscape</name>
@@ -46,7 +46,7 @@
         </plugins>
         <resources>
             <resource>
-                <directory>MobEscape/src/main/resources</directory>
+                <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>
@@ -129,7 +129,7 @@
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
-            <version>2.10.9</version>
+            <version>2.11.5</version>
             <scope>provided</scope>
         </dependency>
 

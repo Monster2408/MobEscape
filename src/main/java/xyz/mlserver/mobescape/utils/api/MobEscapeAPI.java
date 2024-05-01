@@ -17,6 +17,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import xyz.mlserver.java.Log;
 import xyz.mlserver.mobescape.MobEscape;
+import xyz.mlserver.mobescape.utils.MobEscapeDB;
 import xyz.mlserver.mobescape.utils.WorldEditHook;
 import xyz.mlserver.mobescape.utils.bukkit.ActionBar;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
@@ -64,15 +65,15 @@ public class MobEscapeAPI {
         return getArenaCountDownTimeMap().get(map);
     }
 
-    private static HashMap<MobEscapeMap, Double> gameTime;
+    private static HashMap<MobEscapeMap, Integer> gameTime;
 
-    public static HashMap<MobEscapeMap, Double> getGameTimeMap(){
+    public static HashMap<MobEscapeMap, Integer> getGameTimeMap(){
         if (gameTime == null) gameTime = new HashMap<>();
         return gameTime;
     }
 
-    public static Double getGameTime(MobEscapeMap map){
-        getGameTimeMap().putIfAbsent(map, 0.0);
+    public static Integer getGameTime(MobEscapeMap map){
+        getGameTimeMap().putIfAbsent(map, 0);
         return getGameTimeMap().get(map);
     }
 
@@ -315,6 +316,7 @@ public class MobEscapeAPI {
         getGameTimeMap().remove(map);
         getMembersMap().put(map, new ArrayList<>());
         Bukkit.getServer().getPluginManager().callEvent(new MEGameEndEvent(map));
+        MobEscapeDB.save(map.getId());
     }
 
     /**
@@ -370,7 +372,7 @@ public class MobEscapeAPI {
      */
     public static void startGame(MobEscapeMap map) {
         if (MobEscapeAPI.getMembers(map).size() < map.getMinPlayer()) return;
-        MobEscapeAPI.getGameTimeMap().put(map, -1.0*map.getDefaultCountDownTime());
+        MobEscapeAPI.getGameTimeMap().put(map, -10*map.getDefaultCountDownTime());
         getGamePhaseMap().put(map, GamePhase.READY);
         int temp = 0;
         for (Player all : Bukkit.getOnlinePlayers()) {
@@ -396,7 +398,6 @@ public class MobEscapeAPI {
             int time;
             int countdown = -1;
             int taskLocationNum = 2;
-            double gameTime = 0.0;
             @Override
             public void run() {
                 if (getGamePhaseMap().get(map) == GamePhase.STOP) {
@@ -427,11 +428,10 @@ public class MobEscapeAPI {
                     } else if (getGamePhaseMap().get(map) == GamePhase.READY) {
                         getGamePhaseMap().put(map, GamePhase.GAME);
                         Bukkit.getServer().getPluginManager().callEvent(new MEGameStartEvent(map));
-                        for (Player all : Bukkit.getOnlinePlayers()) {
-                            if (MobEscapeAPI.getMembers(map).contains(all)) {
-                                ActionBar.send(all, MainAPI.getMinuteTime(MobEscapeAPI.getGameTime(map)));
-                                all.sendTitle("開始", null, 0, 40, 4);
-                            }
+                        for (Player all : MobEscapeAPI.getMembers(map)) {
+                            ActionBar.send(all, MainAPI.getMinuteTime(MobEscapeAPI.getGameTime(map)));
+                            all.sendTitle("開始", null, 0, 40, 4);
+                            MobEscapeDB.addPlayedCount(all.getUniqueId(), map.getId());
                         }
                     } else {
                         if (taskLocationNum >= map.getPath().size()) {
@@ -456,8 +456,7 @@ public class MobEscapeAPI {
                             }
                         }
                     }
-                    gameTime = (Math.floor((MobEscapeAPI.getGameTime(map) + 0.1) * 10)) / 10;
-                    MobEscapeAPI.getGameTimeMap().put(map, gameTime);
+                    MobEscapeAPI.getGameTimeMap().put(map, MobEscapeAPI.getGameTime(map) + 1);
                 }
             }
         }.runTaskTimer(MobEscape.getPlugin(), 0, 2);

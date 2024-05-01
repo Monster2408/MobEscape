@@ -6,6 +6,7 @@ import java.util.List;
 public class MainAPI {
 
     static String getMinuteTime(int i) {
+        i = i / 10;
         int min = i / 60;
         int sec = i % 60;
         return String.format("%02d", min) + ":" + String.format("%02d", sec);

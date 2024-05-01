@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import xyz.mlserver.java.Log;
+import xyz.mlserver.mobescape.utils.MobEscapeDB;
 import xyz.mlserver.mobescape.utils.WorldEditHook;
 import xyz.mlserver.mobescape.utils.api.MainAPI;
 import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
@@ -314,7 +315,10 @@ public class MobEscapeMap {
         MobEscapeAPI.getGoalPlayersMap().put(this, list);
         player.setGameMode(GameMode.SPECTATOR);
         player.sendMessage("§aおめでとうございます！あなたはゴールしました！");
-        Bukkit.getServer().getPluginManager().callEvent(new MEGameGoalEvent(this, player, MobEscapeAPI.getGameTimeMap().get(this)));
+        double goalTime = MobEscapeAPI.getGameTimeMap().get(this);
+        Bukkit.getServer().getPluginManager().callEvent(new MEGameGoalEvent(this, player, goalTime));
+        MobEscapeDB.addWinCount(player.getUniqueId(), getId());
+        MobEscapeDB.setBestGoalTime(player.getUniqueId(), getId(), goalTime);
         if (!MobEscapeAPI.getWinCommandList().isEmpty()) {
             for (String command : MobEscapeAPI.getWinCommandList()) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));

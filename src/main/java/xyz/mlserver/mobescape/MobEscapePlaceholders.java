@@ -43,7 +43,6 @@ public class MobEscapePlaceholders extends PlaceholderExpansion {
         }
         if (identifier.equals("version")) {
             return String.valueOf(plugin.getDescription().getVersion());
-
         }
         // arena_count
         // played
