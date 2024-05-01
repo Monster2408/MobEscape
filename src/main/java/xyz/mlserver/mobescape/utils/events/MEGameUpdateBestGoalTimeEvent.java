@@ -5,17 +5,19 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
 
-public class MEGameGoalEvent extends Event {
+public class MEGameUpdateBestGoalTimeEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
     private final Player player;
     private final MobEscapeMap map;
-    private final Integer time;
+    private final Integer beforeTime;
+    private final Integer bestTime;
 
-    public MEGameGoalEvent(MobEscapeMap map, Player player, Integer time) {
+    public MEGameUpdateBestGoalTimeEvent(MobEscapeMap map, Player player, Integer beforeTime, Integer bestTime) {
         this.map = map;
         this.player = player;
-        this.time = time;
+        this.beforeTime = beforeTime;
+        this.bestTime = bestTime;
     }
 
     public Player getPlayer() {
@@ -26,8 +28,12 @@ public class MEGameGoalEvent extends Event {
         return map;
     }
 
-    public Integer getTime() {
-        return time;
+    public Integer getBeforeTime() {
+        return beforeTime;
+    }
+
+    public Integer getBestTime() {
+        return bestTime;
     }
 
     @Override

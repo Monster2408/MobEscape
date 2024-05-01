@@ -15,6 +15,7 @@ import xyz.mlserver.mobescape.utils.events.MEGameDeathEvent;
 import xyz.mlserver.mobescape.utils.events.MEGameGoalEvent;
 import xyz.mlserver.mobescape.utils.events.MEGameJoinEvent;
 import xyz.mlserver.mobescape.utils.events.MEGameLeaveEvent;
+import xyz.mlserver.mobescape.utils.events.MEGameUpdateBestGoalTimeEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -314,14 +315,27 @@ public class MobEscapeMap {
         list.add(player);
         MobEscapeAPI.getGoalPlayersMap().put(this, list);
         player.setGameMode(GameMode.SPECTATOR);
-        player.sendMessage("§aおめでとうございます！あなたはゴールしました！");
-        double goalTime = MobEscapeAPI.getGameTimeMap().get(this);
+        Integer goalTime = MobEscapeAPI.getGameTime(this);
         Bukkit.getServer().getPluginManager().callEvent(new MEGameGoalEvent(this, player, goalTime));
         MobEscapeDB.addWinCount(player.getUniqueId(), getId());
-        MobEscapeDB.setBestGoalTime(player.getUniqueId(), getId(), goalTime);
+        String uuidStr = player.getUniqueId().toString();
+        Integer beforeTime;
+        if (!MobEscapeDB.getPlayerBestGoalTime().contains(uuidStr, getId())) beforeTime = -1;
+        else beforeTime = MobEscapeDB.getPlayerBestGoalTime().get(uuidStr, getId());
         if (!MobEscapeAPI.getWinCommandList().isEmpty()) {
             for (String command : MobEscapeAPI.getWinCommandList()) {
+                command = MobEscapeAPI.parsePlaceholder(command, goalTime, beforeTime, player.getName());
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
+            }
+        }
+        if (beforeTime == -1 || beforeTime > goalTime) {
+            MobEscapeDB.setBestGoalTime(player.getUniqueId(), getId(), goalTime);
+            Bukkit.getServer().getPluginManager().callEvent(new MEGameUpdateBestGoalTimeEvent(this, player, beforeTime, goalTime));
+            if (!MobEscapeAPI.getUpdateBestTimeCommandList().isEmpty()) {
+                for (String command : MobEscapeAPI.getUpdateBestTimeCommandList()) {
+                    command = MobEscapeAPI.parsePlaceholder(command, goalTime, beforeTime, player.getName());
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", player.getName()));
+                }
             }
         }
         if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {

@@ -4,11 +4,14 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import xyz.mlserver.mc.util.CustomConfiguration;
 import xyz.mlserver.mobescape.MobEscape;
+import xyz.mlserver.mobescape.utils.api.MainAPI;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class MobEscapeDB {
@@ -35,7 +38,7 @@ public class MobEscapeDB {
      * Integer: Arena ID
      * Double: ゴールタイム
      */
-    private static Table<String, Integer, Double> playerBestGoalTime;
+    private static Table<String, Integer, Integer> playerBestGoalTime;
 
     /**
      * ゲームのプレイ回数(DB保存用)
@@ -57,7 +60,7 @@ public class MobEscapeDB {
      * String: UUID
      * Double: ゴールタイム
      */
-    private static Table<Integer, String, Double> gameBestGoalTime;
+    private static Table<Integer, String, Integer> gameBestGoalTime;
     private static CustomConfiguration dbFile;
 
     public static Table<String, Integer, Integer> getPlayerPlayedCount() {
@@ -70,7 +73,7 @@ public class MobEscapeDB {
         return playerWinCount;
     }
 
-    public static Table<String, Integer, Double> getPlayerBestGoalTime() {
+    public static Table<String, Integer, Integer> getPlayerBestGoalTime() {
         if (playerBestGoalTime == null) playerBestGoalTime = HashBasedTable.create();
         return playerBestGoalTime;
     }
@@ -85,9 +88,60 @@ public class MobEscapeDB {
         return gameWins;
     }
 
-    public static Table<Integer, String, Double> getGameBestGoalTime() {
+    public static Table<Integer, String, Integer> getGameBestGoalTime() {
         if (gameBestGoalTime == null) gameBestGoalTime = HashBasedTable.create();
         return gameBestGoalTime;
+    }
+
+    private static HashMap<String, String> playerNameMap;
+
+    public static HashMap<String, String> getPlayerNameMap() {
+        if (playerNameMap == null) playerNameMap = new HashMap<>();
+        return playerNameMap;
+    }
+
+    public static Table<Integer, String, Integer> getSortByBestGoalTime(int arenaId) {
+        HashMap<String, Integer> sortMap = new HashMap<>();
+        for (String uuid : getPlayerBestGoalTime().rowKeySet()) {
+            if (getPlayerBestGoalTime().contains(uuid, arenaId)) {
+                int winCount = getPlayerBestGoalTime().get(uuid, arenaId);
+                sortMap.put(uuid, winCount);
+            }
+        }
+
+        // 2.Map.Entryのリストを作成する
+        List<Map.Entry<String, Integer>> list_entries = new ArrayList<>(sortMap.entrySet());
+        list_entries.sort(Map.Entry.comparingByValue());
+
+        Table<Integer, String, Integer> table = HashBasedTable.create();
+        int num = 1;
+        for(Map.Entry<String, Integer> entry : list_entries) {
+            table.put(num, entry.getKey(), entry.getValue());
+            num++;
+        }
+        return table;
+    }
+
+    public static Table<Integer, String, Integer> getSortByWinCount(int arenaId) {
+        HashMap<String, Integer> sortMap = new HashMap<>();
+        for (String uuid : getPlayerWinCount().rowKeySet()) {
+            if (getPlayerWinCount().contains(uuid, arenaId)) {
+                int winCount = getPlayerWinCount().get(uuid, arenaId);
+                sortMap.put(uuid, winCount);
+            }
+        }
+
+        // 2.Map.Entryのリストを作成する
+        List<Map.Entry<String, Integer>> list_entries = new ArrayList<>(sortMap.entrySet());
+        list_entries.sort(Map.Entry.comparingByValue());
+
+        Table<Integer, String, Integer> table = HashBasedTable.create();
+        int num = 1;
+        for(Map.Entry<String, Integer> entry : list_entries) {
+            table.put(num, entry.getKey(), entry.getValue());
+            num++;
+        }
+        return table;
     }
 
     public static void addPlayedCount(UUID uuid, int arenaId) {
@@ -106,7 +160,7 @@ public class MobEscapeDB {
         if (!getGameWins().get(arenaId).contains(uuidStr)) getGameWins().get(arenaId).add(uuidStr);
     }
 
-    public static boolean setBestGoalTime(UUID uuid, int arenaId, double time) {
+    public static boolean setBestGoalTime(UUID uuid, int arenaId, Integer time) {
         String uuidStr = uuid.toString();
         if (!getPlayerBestGoalTime().contains(uuidStr, arenaId) || getPlayerBestGoalTime().get(uuidStr, arenaId) > time) {
             getPlayerBestGoalTime().put(uuidStr, arenaId, time);
@@ -131,7 +185,7 @@ public class MobEscapeDB {
                 int arenaIdInt = Integer.parseInt(arenaId);
                 int playedCount = dbFile.getConfig().getInt("stats." + uuid + "." + arenaId + ".played");
                 int winCount = dbFile.getConfig().getInt("stats." + uuid + "." + arenaId + ".wins");
-                double bestGoalTime = dbFile.getConfig().getDouble("stats." + uuid + "." + arenaId + ".best_time");
+                int bestGoalTime = dbFile.getConfig().getInt("stats." + uuid + "." + arenaId + ".best_time");
                 getPlayerPlayedCount().put(uuid, arenaIdInt, playedCount);
                 getPlayerWinCount().put(uuid, arenaIdInt, winCount);
                 getPlayerBestGoalTime().put(uuid, arenaIdInt, bestGoalTime);
@@ -142,7 +196,7 @@ public class MobEscapeDB {
                     if (!getPlayerWinCount().contains(uuid, arenaIdInt)) getPlayerWinCount().put(uuid, arenaIdInt, 0);
                 }
                 if (bestGoalTime > 0) {
-                    if (!getPlayerBestGoalTime().contains(uuid, arenaIdInt)) getPlayerBestGoalTime().put(uuid, arenaIdInt, 0.0);
+                    if (!getPlayerBestGoalTime().contains(uuid, arenaIdInt)) getPlayerBestGoalTime().put(uuid, arenaIdInt, -1);
                 }
             }
         }
@@ -153,7 +207,7 @@ public class MobEscapeDB {
         for (String uuid : getPlayerPlayedCount().rowKeySet()) {
             int playedCount = getPlayerPlayedCount().contains(uuid, arenaId) ? getPlayerPlayedCount().get(uuid, arenaId) : 0;
             int winCount = getPlayerWinCount().contains(uuid, arenaId) ? getPlayerWinCount().get(uuid, arenaId) : 0;
-            double bestGoalTime = getPlayerBestGoalTime().contains(uuid, arenaId) ? getPlayerBestGoalTime().get(uuid, arenaId) : -1.0;
+            int bestGoalTime = getPlayerBestGoalTime().contains(uuid, arenaId) ? getPlayerBestGoalTime().get(uuid, arenaId) : -1;
             dbFile.getConfig().set("stats." + uuid + "." + arenaId + ".played", playedCount);
             dbFile.getConfig().set("stats." + uuid + "." + arenaId + ".wins", winCount);
             dbFile.getConfig().set("stats." + uuid + "." + arenaId + ".best_time", bestGoalTime);

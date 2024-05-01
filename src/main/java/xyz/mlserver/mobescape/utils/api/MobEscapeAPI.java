@@ -129,6 +129,9 @@ public class MobEscapeAPI {
 
     public static void save() {
         if (getLobby() != null) MobEscape.dataYml.getConfig().set("lobby", LocationParser.parseJson(getLobby()));
+        for (String uuidStr : MobEscapeDB.getPlayerNameMap().keySet()) {
+            MobEscape.dataYml.getConfig().set("player-name." + uuidStr, MobEscapeDB.getPlayerNameMap().get(uuidStr));
+        }
         MobEscape.dataYml.saveConfig();
     }
 
@@ -178,6 +181,12 @@ public class MobEscapeAPI {
             }
         }
         if (MobEscape.dataYml.getConfig().get("lobby") != null) setLobby(LocationParser.parseLocation(MobEscape.dataYml.getConfig().getString("lobby")));
+        if (MobEscape.dataYml.getConfig().getConfigurationSection("player-name") != null) {
+            MobEscapeDB.getPlayerNameMap().clear();
+            for (String uuidStr : MobEscape.dataYml.getConfig().getConfigurationSection("player-name").getKeys(false)) {
+                MobEscapeDB.getPlayerNameMap().put(uuidStr, MobEscape.dataYml.getConfig().getString("player-name." + uuidStr));
+            }
+        }
     }
 
     public static void loadMap(MobEscapeMap map) {
@@ -409,12 +418,13 @@ public class MobEscapeAPI {
                     resetGame(map);
                     cancel();
                 } else {
-                    time = (int) Math.floor(MobEscapeAPI.getGameTime(map));
+                    time = MobEscapeAPI.getGameTime(map);
                     if (MainAPI.isDebug()) Log.debug("GameTime: " + time);
                     if (time < 0) {
+                        time = time / -10;
                         for (Player all : Bukkit.getOnlinePlayers()) {
                             if (MobEscapeAPI.getMembers(map).contains(all)) {
-                                ActionBar.send(all, "ゲーム開始まで" + time*-1 + "秒");
+                                ActionBar.send(all, "ゲーム開始まで" + time/-10 + "秒");
                                 if (MainAPI.isDebug()) Log.debug("CountDownTemp: " + countdown);
                                 if (time >= -3 && countdown != time) {
                                     countdown = time;
@@ -483,6 +493,19 @@ public class MobEscapeAPI {
         return winCommandList;
     }
 
+    private static List<String> updateBestTimeCommandList;
+
+    public static void setUpdateBestTimeCommandList() {
+        List<String> updateBestTimeCommandList = MobEscape.config.getConfig().getStringList("update-best-time-command-list");
+        if (updateBestTimeCommandList == null) updateBestTimeCommandList = new ArrayList<>();
+        MobEscapeAPI.updateBestTimeCommandList = updateBestTimeCommandList;
+    }
+
+    public static List<String> getUpdateBestTimeCommandList() {
+        if (updateBestTimeCommandList == null) updateBestTimeCommandList = new ArrayList<>();
+        return updateBestTimeCommandList;
+    }
+
     private static ItemStack leaveItem;
 
     public static ItemStack getLeaveItem() {
@@ -512,6 +535,20 @@ public class MobEscapeAPI {
     public static HashMap<MobEscapeMap, List<UUID>> getMapStartVote() {
         if (mapStartVote == null) mapStartVote = new HashMap<>();
         return mapStartVote;
+    }
+
+    public static String parsePlaceholder(String text, int time, int best_time, String playerName) {
+        if (text == null) return null;
+        if (time != -1) {
+            if (text.contains("%time%")) text = text.replace("%time%", String.valueOf(time));
+            if (text.contains("%time_sec%")) text = text.replace("%time_sec%", MainAPI.getMinuteTime(time));
+        }
+        if (best_time != -1) {
+            if (text.contains("%best_time%")) text = text.replace("%best_time%", String.valueOf(best_time));
+            if (text.contains("%best_time_sec%")) text = text.replace("%best_time_sec%", MainAPI.getMinuteTime(time));
+        }
+        if (text.contains("%player%") && playerName != null) text = text.replace("%player%", playerName);
+        return text;
     }
 
 }

@@ -1,2 +1,12 @@
+# placeholder:
+#   %player%: player name
+#   %time%: time(100 millisecond unit)
+#   %time_sec%: time(second unit)
+#   %best_time%: best time(This is the time before the update, 100 millisecond unit)
+#   %best_time_sec%: best time(This is the time before the update, second unit)
+#   ※ time is on 100 millisecond unit
 win-command-list:
     - "bp add %player% 1000"
+
+update-best-time-command-list:
+    - "bp set %player% 500"
