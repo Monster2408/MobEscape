@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,6 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import xyz.mlserver.java.Log;
+import xyz.mlserver.mc.util.itemstack.OriginalItemStack;
 import xyz.mlserver.mobescape.MobEscape;
 import xyz.mlserver.mobescape.utils.MobEscapeDB;
 import xyz.mlserver.mobescape.utils.WorldEditHook;
@@ -388,8 +390,7 @@ public class MobEscapeAPI {
             if (MobEscapeAPI.getMembers(map).contains(all)) {
                 if (map.getSpawns().size() <= temp) temp = 0;
                 all.teleport(map.getSpawns().get(temp).clone());
-                all.getInventory().clear();
-                all.getInventory().setItem(0, MobEscapeAPI.getLeaveItem());
+                all.getInventory().setItem(8, null);
                 temp++;
             }
         }
@@ -421,10 +422,10 @@ public class MobEscapeAPI {
                     time = MobEscapeAPI.getGameTime(map);
                     if (MainAPI.isDebug()) Log.debug("GameTime: " + time);
                     if (time < 0) {
-                        time = time / -10;
+                        time = time / 10;
                         for (Player all : Bukkit.getOnlinePlayers()) {
                             if (MobEscapeAPI.getMembers(map).contains(all)) {
-                                ActionBar.send(all, "ゲーム開始まで" + time/-10 + "秒");
+                                ActionBar.send(all, "ゲーム開始まで" + time + "秒");
                                 if (MainAPI.isDebug()) Log.debug("CountDownTemp: " + countdown);
                                 if (time >= -3 && countdown != time) {
                                     countdown = time;
@@ -549,6 +550,24 @@ public class MobEscapeAPI {
         }
         if (text.contains("%player%") && playerName != null) text = text.replace("%player%", playerName);
         return text;
+    }
+
+
+
+    public static void hidePlayers(Player player) {
+        for (Player all : Bukkit.getOnlinePlayers()) player.hidePlayer(MobEscape.getPlugin(), all);
+    }
+
+    public static void showPlayers(Player player) {
+        for (Player all : Bukkit.getOnlinePlayers()) player.showPlayer(MobEscape.getPlugin(), all);
+    }
+
+    public static ItemStack getAnotherPlayerShowTool() {
+        return OriginalItemStack.createItem(Material.INK_SACK, 1, "プレイヤー:" + ChatColor.GREEN + "表示" + ChatColor.GRAY + "(右クリック)", DyeColor.LIME.getDyeData());
+    }
+
+    public static ItemStack getAnotherPlayerHideTool() {
+        return OriginalItemStack.createItem(Material.INK_SACK, 1, "プレイヤー:" + ChatColor.RED + "非表示" + ChatColor.GRAY + "(右クリック)", DyeColor.GRAY.getDyeData());
     }
 
 }

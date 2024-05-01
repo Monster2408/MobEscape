@@ -287,12 +287,14 @@ public class MobEscapeMap {
             player.setGameMode(GameMode.SURVIVAL);
             player.getInventory().clear();
             player.getInventory().setItem(0, MobEscapeAPI.getLeaveItem());
+            player.getInventory().setItem(1, MobEscapeAPI.getAnotherPlayerHideTool());
             player.getInventory().setItem(8, MobEscapeAPI.getStartVoteItem());
         } else {
             player.setGameMode(GameMode.SPECTATOR);
             player.sendMessage("§cゲーム中のため観戦モードに設定しました。");
         }
         MobEscapeAPI.startArenaCountDown(this);
+        MobEscapeAPI.showPlayers(player);
     }
 
     public void leave(Player player) {
@@ -306,6 +308,7 @@ public class MobEscapeMap {
         if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
             MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.STOP);
         }
+        MobEscapeAPI.showPlayers(player);
     }
 
     public void goal(Player player) {
@@ -341,6 +344,7 @@ public class MobEscapeMap {
         if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
             MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.END);
         }
+        MobEscapeAPI.showPlayers(player);
     }
 
     public void death(Player player, DeathReason reason) {
@@ -352,6 +356,7 @@ public class MobEscapeMap {
         if (MobEscapeAPI.getCountdownTaskMap().containsKey(this) && isEnd()) {
             MobEscapeAPI.getGamePhaseMap().put(this, GamePhase.END);
         }
+        MobEscapeAPI.showPlayers(player);
     }
 
     public enum DeathReason {
