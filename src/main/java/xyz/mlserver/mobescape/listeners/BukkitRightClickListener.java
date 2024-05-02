@@ -49,6 +49,12 @@ public class BukkitRightClickListener implements Listener {
                     return;
                 }
             }
+        } else if (item.isSimilar(MobEscapeAPI.getAnotherPlayerShowTool())) {
+            MobEscapeAPI.showPlayers(player);
+            player.getInventory().setItem(1, MobEscapeAPI.getAnotherPlayerHideTool());
+        } else if (item.isSimilar(MobEscapeAPI.getAnotherPlayerHideTool())) {
+            MobEscapeAPI.hidePlayers(player);
+            player.getInventory().setItem(1, MobEscapeAPI.getAnotherPlayerShowTool());
         }
     }
 

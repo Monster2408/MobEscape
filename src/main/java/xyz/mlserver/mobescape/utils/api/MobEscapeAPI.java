@@ -563,11 +563,11 @@ public class MobEscapeAPI {
     }
 
     public static ItemStack getAnotherPlayerShowTool() {
-        return OriginalItemStack.createItem(Material.INK_SACK, 1, "プレイヤー:" + ChatColor.GREEN + "表示" + ChatColor.GRAY + "(右クリック)", DyeColor.LIME.getDyeData());
+        return OriginalItemStack.createItem(Material.INK_SACK, 1, "プレイヤー:" + ChatColor.GREEN + "表示" + ChatColor.YELLOW + "(右クリック)", DyeColor.LIME.getDyeData());
     }
 
     public static ItemStack getAnotherPlayerHideTool() {
-        return OriginalItemStack.createItem(Material.INK_SACK, 1, "プレイヤー:" + ChatColor.RED + "非表示" + ChatColor.GRAY + "(右クリック)", DyeColor.GRAY.getDyeData());
+        return OriginalItemStack.createItem(Material.INK_SACK, 1, "プレイヤー:" + ChatColor.RED + "非表示" + ChatColor.YELLOW + "(右クリック)", DyeColor.GRAY.getDyeData());
     }
 
 }
