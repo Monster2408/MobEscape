@@ -7,9 +7,6 @@ import org.bukkit.OfflinePlayer;
 import xyz.mlserver.mobescape.utils.MobEscapeDB;
 import xyz.mlserver.mobescape.utils.api.MainAPI;
 import xyz.mlserver.mobescape.utils.api.MobEscapeAPI;
-import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
-
-import java.util.HashMap;
 
 public class MobEscapePlaceholders extends PlaceholderExpansion {
     private final MobEscape plugin;

@@ -4,11 +4,8 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import xyz.mlserver.mc.util.CustomConfiguration;
 import xyz.mlserver.mobescape.MobEscape;
-import xyz.mlserver.mobescape.utils.api.MainAPI;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -1,6 +1,5 @@
 package xyz.mlserver.mobescape.utils.events;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;

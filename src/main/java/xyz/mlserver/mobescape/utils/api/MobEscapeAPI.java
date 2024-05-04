@@ -2,6 +2,7 @@ package xyz.mlserver.mobescape.utils.api;
 
 import com.google.gson.Gson;
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
@@ -24,12 +25,9 @@ import xyz.mlserver.mobescape.utils.WorldEditHook;
 import xyz.mlserver.mobescape.utils.bukkit.ActionBar;
 import xyz.mlserver.mobescape.utils.bukkit.LocationParser;
 import xyz.mlserver.mobescape.utils.events.MEGameEndEvent;
-import xyz.mlserver.mobescape.utils.events.MEGameGoalEvent;
 import xyz.mlserver.mobescape.utils.events.MEGameStartEvent;
 import xyz.mlserver.mobescape.utils.game.GamePhase;
 import xyz.mlserver.mobescape.utils.game.MobEscapeMap;
-
-import net.citizensnpcs.api.npc.NPC;
 import xyz.mlserver.mobescape.utils.trait.MoveAndAttackTrait;
 import xyz.mlserver.mobescape.utils.trait.MoveAndBreakTrait;
 
