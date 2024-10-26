@@ -102,7 +102,7 @@ public class MobEscapeDB {
         for (String uuid : getPlayerBestGoalTime().rowKeySet()) {
             if (getPlayerBestGoalTime().contains(uuid, arenaId)) {
                 int winCount = getPlayerBestGoalTime().get(uuid, arenaId);
-                sortMap.put(uuid, winCount);
+                if (winCount > 0) sortMap.put(uuid, winCount);
             }
         }
 
@@ -121,6 +121,7 @@ public class MobEscapeDB {
 
     public static Table<Integer, String, Integer> getSortByWinCount(int arenaId) {
         HashMap<String, Integer> sortMap = new HashMap<>();
+
         for (String uuid : getPlayerWinCount().rowKeySet()) {
             if (getPlayerWinCount().contains(uuid, arenaId)) {
                 int winCount = getPlayerWinCount().get(uuid, arenaId);
@@ -130,14 +131,16 @@ public class MobEscapeDB {
 
         // 2.Map.Entryのリストを作成する
         List<Map.Entry<String, Integer>> list_entries = new ArrayList<>(sortMap.entrySet());
-        list_entries.sort(Map.Entry.comparingByValue());
+        // 降順にソート
+        list_entries.sort(Map.Entry.<String, Integer>comparingByValue().reversed());
 
         Table<Integer, String, Integer> table = HashBasedTable.create();
         int num = 1;
-        for(Map.Entry<String, Integer> entry : list_entries) {
+        for (Map.Entry<String, Integer> entry : list_entries) {
             table.put(num, entry.getKey(), entry.getValue());
             num++;
         }
+
         return table;
     }
 
